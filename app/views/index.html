@@ -1,0 +1,96 @@
+{% extends 'layouts/base.html' %}
+
+{% block main %}
+
+<script>
+
+
+    // var machine_name = {{machine_name|tojson}}
+
+    $( document ).ready(function() {
+        update_machine_status(machine_name)
+
+        // if (typeof $.cookie(machine_name) === 'undefined'){
+        //
+        //     let password = prompt("Enter password");
+        //
+        //     if (password != null) {
+        //         if (passwords_dict[machine_name] == password) {
+        //             $.cookie(machine_name, password, { expires : 30 });
+        //
+        //             update_machine_status(machine_name)
+        //         }
+        //         else {
+        //             alert("Password incorrect");
+        //             location.reload();
+        //         }
+        //     }
+        //
+        // }
+        // else if (passwords_dict[machine_name] == $.cookie(machine_name)) {
+        //
+        //     update_machine_status(machine_name)
+        // }
+        // else {
+        //     $.removeCookie(machine_name, { path: '/' });
+        //     location.reload();
+        //
+        // }
+
+        if(isMobile){
+            $("#machine_img").css("width","90vw")
+            $("#image_1").parent().css("width","90vw")
+            $("#image_1").parent().css("padding","2vw")
+        }
+
+    });
+    </script>
+<div style="width: 20vw;max-width:1500px;border-radius: 1em;border-color: #e7e7e7;margin-left: auto;border-width:1px;margin-right: auto;" id="machine_img">
+    <img style="width: 100%;
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightgray;
+    border-radius: 1em;"
+    src="https://i.imgur.com/UZNn9Ix.png">
+</div>
+
+<div style="
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    white-space: nowrap;
+    font-size: 2em;
+">
+    <i class="fa fa-power-off" aria-hidden="true" id="power_button"></i>
+    <div id="online_status" style="display: inline-flex; margin-left: 1%;">Offline</div>
+</div>
+
+<div id="current_step" style="
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+    white-space: nowrap;
+    display: none;
+"></div>
+
+<div id="etch_time_left" style="
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+    white-space: nowrap;
+    display: none;
+"></div>
+
+<div style="width: 55vw;max-width:1500px;border-radius: 1em;border-color: #91eb77;padding: 0.5vw;border:solid;margin-left: auto;border-width:1px;margin-right: auto;">
+    <img style="width:100%;" id="image_1" src="">
+</div>
+
+<div style="width: 55vw;max-width:1500px;border-radius: 1em;border-color: #91eb77;margin-top: 2%;margin-left: auto;border-width:1px;margin-right: auto;">
+    <div id="last_log_date"></div>
+</div>
+
+<div style="width: 55vw;max-width:1500px;border-radius: 1em;border-color: #91eb77;margin-top: 2%;margin-left: auto;border-width:1px;margin-right: auto;">
+    <a href="" id="backend_log">Latest backend log</a>
+</div>
+
+{% endblock %}
