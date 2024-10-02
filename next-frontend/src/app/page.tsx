@@ -1,9 +1,8 @@
-"use client"; // This directive ensures the component is rendered on the client side
+"use client";
 
 import { useEffect, useState } from 'react';
-import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
-import { Welcome } from '../components/Welcome/Welcome';
-import { DoubleNavbar } from '../components/DoubleNavbar/DoubleNavbar'; // Adjust the path as necessary
+import { Container, Flex, Box } from '@mantine/core';
+import { MainLayout } from '../components/MainLayout';
 
 export default function HomePage() {
   const [data, setData] = useState(null);
@@ -14,13 +13,13 @@ export default function HomePage() {
       try {
         const response = await fetch(`http://localhost:5000/api/data`);
         if (!response.ok) {
-          const errorDetails = await response.text(); // Get response text
+          const errorDetails = await response.text();
           throw new Error(`Network response was not ok: ${errorDetails}`);
         }
         const result = await response.json();
         setData(result);
       } catch (error) {
-        console.error('Fetch error:', error); // Log full error details
+        console.error('Fetch error:', error);
         setError(error);
       }
     };
@@ -29,15 +28,19 @@ export default function HomePage() {
   }, []);
 
   return (
-    <>
-    <ColorSchemeToggle />
-    <DoubleNavbar />
-      {error && <p>Error fetching data: {error.message}</p>}
-      {data ? (
-        <pre>{JSON.stringify(data, null, 2)}</pre> // Displaying the data as JSON
-      ) : (
-        <p>Loading...</p>
-      )}
-    </>
+    <MainLayout>
+      {/* <Container size="xl" p={0} style={{ height: '100vh' }}>
+        <Flex style={{ height: '100%' }}>
+          <Box w="75%" h="100%" style={{ position: 'relative', overflow: 'hidden' }}>
+            {error && <p>Error fetching data: {error.message}</p>}
+            {data ? (
+              <pre>{JSON.stringify(data, null, 2)}</pre>
+            ) : (
+              <p>Loading...</p>
+            )}
+          </Box>
+        </Flex>
+      </Container> */}
+    </MainLayout>
   );
 }

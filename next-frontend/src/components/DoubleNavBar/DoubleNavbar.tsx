@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { UnstyledButton, Tooltip, Title, rem } from '@mantine/core';
 import {
   IconHome2,
@@ -11,9 +11,15 @@ import {
   IconUser,
   IconSettings,
 } from '@tabler/icons-react';
-// Correct import for MantineLogo if used
-import { MantineLogo } from '@mantine/ds';
 import classes from './DoubleNavbar.module.css';
+import { HomePage } from './HomePage';
+
+interface DoubleNavbarProps {
+  thresholdValue: number;
+  setThresholdValue: (value: number) => void;
+  skewValue: number;
+  setSkewValue: (value: number) => void;
+}
 
 const mainLinksMockdata = [
   { icon: IconHome2, label: 'Home' },
@@ -25,25 +31,10 @@ const mainLinksMockdata = [
   { icon: IconSettings, label: 'Settings' },
 ];
 
-const linksMockdata = [
-  'Security',
-  'Settings',
-  'Dashboard',
-  'Releases',
-  'Account',
-  'Orders',
-  'Clients',
-  'Databases',
-  'Pull Requests',
-  'Open Issues',
-  'Wiki pages',
-];
+export function DoubleNavbar({ thresholdValue, setThresholdValue, skewValue, setSkewValue }: DoubleNavbarProps) {
+  const [active, setActive] = useState(0);
 
-export function DoubleNavbar() {
-  const [active, setActive] = useState('Releases');
-  const [activeLink, setActiveLink] = useState('Settings');
-
-  const mainLinks = mainLinksMockdata.map((link) => (
+  const mainLinks = mainLinksMockdata.map((link, index) => (
     <Tooltip
       label={link.label}
       position="right"
@@ -52,45 +43,50 @@ export function DoubleNavbar() {
       key={link.label}
     >
       <UnstyledButton
-        onClick={() => setActive(link.label)}
+        onClick={() => setActive(index)}
         className={classes.mainLink}
-        data-active={link.label === active} // Updated to boolean value
+        data-active={index === active || undefined}
       >
         <link.icon style={{ width: rem(22), height: rem(22) }} stroke={1.5} />
       </UnstyledButton>
     </Tooltip>
   ));
 
-  const links = linksMockdata.map((link) => (
-    <a
-      className={classes.link}
-      data-active={activeLink === link} // Updated to boolean value
-      href="#" // Ensure this is correct for your app
-      onClick={(event) => {
-        event.preventDefault();
-        setActiveLink(link);
-      }}
-      key={link}
-    >
-      {link}
-    </a>
-  ));
+  const renderContent = () => {
+    switch (active) {
+      case 0: // Home
+        return (
+          <HomePage
+            thresholdValue={thresholdValue}
+            setThresholdValue={setThresholdValue}
+            skewValue={skewValue}
+            setSkewValue={setSkewValue}
+          />
+        );
+      case 1: // Dashboard
+        return <div>Dashboard Content</div>;
+      case 2: // Analytics
+        return <div>Analytics Content</div>;
+      // ... add cases for other sections as needed
+      default:
+        return <div>Select a section</div>;
+    }
+  };
 
   return (
     <nav className={classes.navbar}>
       <div className={classes.wrapper}>
         <div className={classes.aside}>
           <div className={classes.logo}>
-            {/* Uncomment and ensure MantineLogo is correctly imported */}
-            {/* <MantineLogo type="mark" size={30} /> */}
+            {/* You can add your logo here */}
           </div>
           {mainLinks}
         </div>
         <div className={classes.main}>
           <Title order={4} className={classes.title}>
-            {active}
+            {mainLinksMockdata[active].label}
           </Title>
-          {links}
+          {renderContent()}
         </div>
       </div>
     </nav>
