@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Title, Slider, Stack, Select, Text } from '@mantine/core';
 import classes from './DoubleNavbar.module.css';
 
@@ -7,100 +7,77 @@ interface DashboardPageProps {
   setThresholdValue: (value: number) => void;
   skewValue: number;
   setSkewValue: (value: number) => void;
-  simulation: string;
-  setSimulation: (value: string) => void;
-  material: string;
-  setMaterial: (value: string) => void;
-  energy: number;
-  setEnergy: (value: number) => void;
-  beamSize: number;
-  setBeamSize: (value: number) => void;
+  setSelectedFile: (file: string) => void;
+}
+
+interface FlukaParams {
+  BEAM_ENERGY: string[];
+  BEAM_SIZE: string[];
+  MATERIAL: string[];
+  files: { [key: string]: string };
 }
 
 export function DashboardPage({ 
   thresholdValue, setThresholdValue,
   skewValue, setSkewValue,
-  simulation, setSimulation,
-  material, setMaterial,
-  energy, setEnergy,
-  beamSize, setBeamSize
+  setSelectedFile
 }: DashboardPageProps) {
-  // console.log('HomePage rendered with:', { thresholdValue, skewValue });
+  const [flukaParams, setFlukaParams] = useState<FlukaParams | null>(null);
+  const [beamEnergy, setBeamEnergy] = useState<string>('');
+  const [beamSize, setBeamSize] = useState<string>('');
+  const [material, setMaterial] = useState<string>('');
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/get_fluka_files')
+      .then(response => response.json())
+      .then(data => setFlukaParams(data));
+  }, []);
+
+  useEffect(() => {
+    if (flukaParams && beamEnergy && beamSize && material) {
+      const fileKey = `${beamEnergy}_${beamSize}_${material}`;
+      const selectedFileName = flukaParams.files[fileKey];
+      if (selectedFileName) {
+        setSelectedFile(selectedFileName);
+      }
+    }
+  }, [flukaParams, beamEnergy, beamSize, material, setSelectedFile]);
 
   const handleThresholdChange = (value: number) => {
-    // console.log('HomePage: Threshold slider changed:', value);
-    if (typeof setThresholdValue === 'function') {
-      setThresholdValue(value);
-    } else {
-      console.error('setThresholdValue is not a function:', setThresholdValue);
-    }
+    console.log('Threshold value changed:', value);
+    setThresholdValue(value);
   };
 
   const handleSkewChange = (value: number) => {
-    // console.log('HomePage: Skew slider changed:', value);
-    if (typeof setSkewValue === 'function') {
-      setSkewValue(value);
-    } else {
-      console.error('setSkewValue is not a function:', setSkewValue);
-    }
+    console.log('Skew value changed:', value);
+    setSkewValue(value);
   };
 
   return (
     <div>
       <Stack spacing="md" style={{ maxWidth: 400, margin: '20px 0' }}>
-        <Select
-          label="Simulation"
-          value={simulation}
-          onChange={(value) => setSimulation(value as string)}
-          data={[
-            { value: 'energy', label: 'Energy' },
-            { value: 'particles', label: 'Particles' },
-          ]}
-        />
-        <Select
-          label="Material"
-          value={material}
-          onChange={(value) => setMaterial(value as string)}
-          data={[
-            { value: 'copper', label: 'Copper' },
-            { value: 'aluminum', label: 'Aluminum' },
-          ]}
-        />
-        <Text size="sm">Energy (MeV)</Text>
-        <Slider
-          min={1}
-          max={10}
-          step={1}
-          value={energy}
-          onChange={setEnergy}
-          marks={[
-            { value: 1, label: '1' },
-            { value: 2, label: '2' },
-            { value: 3, label: '3' },
-            { value: 4, label: '4' },
-            { value: 5, label: '5' },
-            { value: 6, label: '6' },
-            { value: 7, label: '7' },
-            { value: 8, label: '8' },
-            { value: 9, label: '9' },
-            { value: 10, label: '10' },
-          ]}
-        />
-        <Text size="sm">Beam Size (cm)</Text>
-        <Slider
-          min={1}
-          max={5}
-          step={1}
-          value={beamSize}
-          onChange={setBeamSize}
-          marks={[
-            { value: 1, label: '1' },
-            { value: 2, label: '2' },
-            { value: 3, label: '3' },
-            { value: 4, label: '4' },
-            { value: 5, label: '5' },
-          ]}
-        />
+        {flukaParams && (
+          <>
+            <Select
+              label="Beam Energy"
+              value={beamEnergy}
+              onChange={(value) => setBeamEnergy(value as string)}
+              data={flukaParams.BEAM_ENERGY?.map(energy => ({ value: energy, label: energy })) || []}
+            />
+            <Select
+              label="Beam Size"
+              value={beamSize}
+              onChange={(value) => setBeamSize(value as string)}
+              data={flukaParams.BEAM_SIZE?.map(size => ({ value: size, label: size })) || []}
+            />
+            <Select
+              label="Material"
+              value={material}
+              onChange={(value) => setMaterial(value as string)}
+              data={flukaParams.MATERIAL?.map(mat => ({ value: mat, label: mat })) || []}
+            />
+          </>
+        )}
         <Text size="sm">Lowest Visible Value</Text>
         <Slider
           min={0}

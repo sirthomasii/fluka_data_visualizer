@@ -1,4 +1,3 @@
-
 from flask import Flask
 from mvc_flask import FlaskMVC
 from os import path, environ
@@ -23,6 +22,9 @@ def create_app():
     dir_path = path.dirname(path.realpath(__file__))
     # Init Flask App
     app = Flask(__name__, static_url_path='/static', root_path=os.path.dirname(dir_path))
+    # Add these lines to enable debug mode
+    app.config['DEBUG'] = True
+    app.config['PROPAGATE_EXCEPTIONS'] = True
     # Init MVC module
     FlaskMVC(app)
     CORS(app)  # This allows all domains to access your Flask app
