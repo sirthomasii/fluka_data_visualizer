@@ -14,9 +14,11 @@ interface DataPoint {
 interface PointCloudSceneProps {
   thresholdValue: number;
   skewValue: number;
+  geometry: string;
+  onDataLoaded: (data: DataPoint[]) => void;
 }
 
-const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdValue, skewValue }) => {
+const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdValue, skewValue, geometry, onDataLoaded }) => {
   // console.log('PointCloudScene rendered with:', { thresholdValue, skewValue });
 
   const mountRef = useRef<HTMLDivElement>(null);
@@ -50,12 +52,13 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
             setData(event.data.points);
             setMinValue(event.data.minValue);
             setMaxValue(event.data.maxValue);
+            onDataLoaded(event.data.points); // Call the callback with the loaded data
           }
           worker.terminate();
         };
       })
       .catch(error => console.error('Error fetching CSV:', error));
-  }, []);
+  }, [onDataLoaded]);
 
   const initScene = useCallback(() => {
     if (!mountRef.current) return;
@@ -106,8 +109,30 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     sceneRef.current.add(gridHelper);
 
     return () => {
+      console.log('Cleanup function called');
       window.removeEventListener('resize', handleResize);
-      mountRef.current!.removeChild(renderer.domElement);
+      
+      if (mountRef.current) {
+        console.log('mountRef.current exists');
+        if (renderer && renderer.domElement) {
+          console.log('renderer and domElement exist');
+          if (mountRef.current.contains(renderer.domElement)) {
+            console.log('Attempting to remove renderer.domElement');
+            try {
+              mountRef.current.removeChild(renderer.domElement);
+              console.log('Successfully removed renderer.domElement');
+            } catch (error) {
+              console.error('Error removing renderer.domElement:', error);
+            }
+          } else {
+            console.log('renderer.domElement is not a child of mountRef.current');
+          }
+        } else {
+          console.log('renderer or domElement is undefined');
+        }
+      } else {
+        console.log('mountRef.current is null');
+      }
     };
   }, []);
 
@@ -249,7 +274,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
 
   return (
     <div>
-      <div ref={mountRef} style={{ width: '100%', height: '400px' }} />
+      <div ref={mountRef} style={{ width: '100%', height: '100vh' }} />
       {data.length === 0 && <div>Loading point cloud data...</div>}
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { UnstyledButton, Tooltip, Title, rem } from '@mantine/core';
+import { UnstyledButton, Tooltip, Title, rem, Button, Group } from '@mantine/core';
 import {
   IconHome2,
   IconGauge,
@@ -13,12 +13,16 @@ import {
 } from '@tabler/icons-react';
 import classes from './DoubleNavbar.module.css';
 import { HomePage } from './HomePage';
+import { DashboardPage } from './DashboardPage';
+import { AnalyticsPage } from './AnalyticsPage';
 
 interface DoubleNavbarProps {
   thresholdValue: number;
   setThresholdValue: (value: number) => void;
   skewValue: number;
   setSkewValue: (value: number) => void;
+  setGeometry: (geometry: string) => void;
+  pointsData: { x: number; y: number; z: number; value: number }[];
 }
 
 const mainLinksMockdata = [
@@ -31,7 +35,7 @@ const mainLinksMockdata = [
   { icon: IconSettings, label: 'Settings' },
 ];
 
-export function DoubleNavbar({ thresholdValue, setThresholdValue, skewValue, setSkewValue }: DoubleNavbarProps) {
+export function DoubleNavbar({ thresholdValue, setThresholdValue, skewValue, setSkewValue, setGeometry, pointsData }: DoubleNavbarProps) {
   const [active, setActive] = useState(0);
 
   const mainLinks = mainLinksMockdata.map((link, index) => (
@@ -56,18 +60,23 @@ export function DoubleNavbar({ thresholdValue, setThresholdValue, skewValue, set
     switch (active) {
       case 0: // Home
         return (
-          <HomePage
+          <HomePage setGeometry={setGeometry} />
+        );
+      case 1: // Dashboard
+        return (
+          <DashboardPage
             thresholdValue={thresholdValue}
             setThresholdValue={setThresholdValue}
             skewValue={skewValue}
             setSkewValue={setSkewValue}
           />
         );
-      case 1: // Dashboard
-        return <div>Dashboard Content</div>;
       case 2: // Analytics
-        return <div>Analytics Content</div>;
-      // ... add cases for other sections as needed
+        console.log("DoubleNavbar pointsData:", pointsData);
+        return (
+          <AnalyticsPage pointsData={pointsData} />
+        );
+      // ... other cases ...
       default:
         return <div>Select a section</div>;
     }

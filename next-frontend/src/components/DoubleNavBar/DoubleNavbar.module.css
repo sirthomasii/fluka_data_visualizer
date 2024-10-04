@@ -23,7 +23,10 @@
 
 .main {
   flex: 1;
-  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+  background-color: var(--mantine-color-body);
+  padding: var(--mantine-spacing-md);
+  display: flex;
+  flex-direction: column;
 }
 
 .mainLink {
@@ -52,7 +55,8 @@
   font-family:
     Greycliff CF,
     var(--mantine-font-family);
-  margin-bottom: var(--mantine-spacing-xl);
+  margin-bottom: var(--mantine-spacing-sm);
+  line-height: 1;
   background-color: var(--mantine-color-body);
   padding: var(--mantine-spacing-md);
   padding-top: rem(18px);
