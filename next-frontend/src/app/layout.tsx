@@ -1,9 +1,15 @@
 'use client'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MantineProvider } from '@mantine/core'
+import { MantineProvider, createTheme } from '@mantine/core'
 import { useState } from 'react'
 import '@mantine/core/styles.css'
+
+// Create a theme with dark color scheme
+const theme = createTheme({
+  primaryColor: 'dark',
+  // You can add more theme customizations here
+});
 
 export default function RootLayout({
   children,
@@ -16,7 +22,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <QueryClientProvider client={queryClient}>
-          <MantineProvider>
+          <MantineProvider theme={theme}>
             {children}
           </MantineProvider>
         </QueryClientProvider>
