@@ -26,6 +26,8 @@ interface DoubleNavbarProps {
   setSelectedFile: (file: string) => void;
   minValue: number;  // Add this
   maxValue: number;  // Add this
+  hideHalfPoints: boolean;  // Add this
+  setHideHalfPoints: (hide: boolean) => void;
 }
 
 const mainLinksMockdata = [
@@ -44,9 +46,14 @@ export function DoubleNavbar({
   setGeometry, pointsData,
   setSelectedFile,
   minValue,  // Add this
-  maxValue   // Add this
+  maxValue,  // Add this
+  hideHalfPoints,  // Add this
+  setHideHalfPoints
 }: DoubleNavbarProps) {
   const [active, setActive] = useState(0);
+  const [beamEnergy, setBeamEnergy] = useState<string>('');
+  const [beamSize, setBeamSize] = useState<string>('');
+  const [material, setMaterial] = useState<string>('');
 
   const mainLinks = mainLinksMockdata.map((link, index) => (
     <Tooltip
@@ -82,6 +89,14 @@ export function DoubleNavbar({
             setSelectedFile={setSelectedFile}
             minValue={minValue}  // Pass this
             maxValue={maxValue}  // Pass this
+            beamEnergy={beamEnergy}
+            setBeamEnergy={setBeamEnergy}
+            beamSize={beamSize}
+            setBeamSize={setBeamSize}
+            material={material}
+            setMaterial={setMaterial}
+            hideHalfPoints={hideHalfPoints}  // Add this
+            setHideHalfPoints={setHideHalfPoints}
           />
         );
       case 2: // Analytics

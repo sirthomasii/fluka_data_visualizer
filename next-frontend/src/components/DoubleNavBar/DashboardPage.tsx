@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Title, Slider, Stack, Select, Text } from '@mantine/core';
+import { Title, Slider, Stack, Select, Text, Button } from '@mantine/core';
 import classes from './DoubleNavbar.module.css';
 
 interface DashboardPageProps {
@@ -10,6 +10,14 @@ interface DashboardPageProps {
   setSelectedFile: (file: string) => void;
   minValue: number;
   maxValue: number;
+  beamEnergy: string;
+  setBeamEnergy: (value: string) => void;
+  beamSize: string;
+  setBeamSize: (value: string) => void;
+  material: string;
+  setMaterial: (value: string) => void;
+  setHideHalfPoints: (hide: boolean) => void;
+  hideHalfPoints: boolean;
 }
 
 interface FlukaParams {
@@ -23,12 +31,14 @@ export function DashboardPage({
   thresholdValue, setThresholdValue,
   skewValue, setSkewValue,
   setSelectedFile,
-  minValue, maxValue
+  minValue, maxValue,
+  beamEnergy, setBeamEnergy,
+  beamSize, setBeamSize,
+  material, setMaterial,
+  setHideHalfPoints,
+  hideHalfPoints
 }: DashboardPageProps) {
   const [flukaParams, setFlukaParams] = useState<FlukaParams | null>(null);
-  const [beamEnergy, setBeamEnergy] = useState<string>('');
-  const [beamSize, setBeamSize] = useState<string>('');
-  const [material, setMaterial] = useState<string>('');
 
   useEffect(() => {
     fetch('http://localhost:5000/api/get_fluka_files')
@@ -121,6 +131,12 @@ export function DashboardPage({
           onChangeEnd={(value) => console.log('Skew slider change ended:', value)}
           labelAlwaysOn
         />
+        <Button 
+          onClick={() => setHideHalfPoints(!hideHalfPoints)}
+          variant={hideHalfPoints ? "filled" : "outline"}
+        >
+          {hideHalfPoints ? "Show All Points" : "Hide Half Points"}
+        </Button>
       </Stack>
     </div>
   );

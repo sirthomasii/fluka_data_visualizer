@@ -17,9 +17,10 @@ interface PointCloudSceneProps {
   geometry: string;
   pointsData: DataPoint[];
   pointSize?: number;
+  hideHalfPoints: boolean;
 }
 
-const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdValue, skewValue, geometry, pointsData, pointSize = 2.5 }) => {
+const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdValue, skewValue, geometry, pointsData, pointSize = 2.5, hideHalfPoints }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -145,18 +146,21 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
 
     pointsData.forEach((point, i) => {
       if (point.value >= thresholdValue) {
-        // Rotate the point 90 degrees around X-axis
-        positions[validPointCount * 3] = point.x;
-        positions[validPointCount * 3 + 1] = -point.z; // Negative z becomes y
-        positions[validPointCount * 3 + 2] = point.y; // Y becomes z
+        // Only add points if not hiding half or if the point is in the visible half
+        if (!hideHalfPoints || point.x <= 0) {
+          // Rotate the point 90 degrees around X-axis
+          positions[validPointCount * 3] = point.x;
+          positions[validPointCount * 3 + 1] = -point.z; // Negative z becomes y
+          positions[validPointCount * 3 + 2] = point.y; // Y becomes z
 
-        const color = getColor(point.value);
+          const color = getColor(point.value);
 
-        colors[validPointCount * 3] = color.r;
-        colors[validPointCount * 3 + 1] = color.g;
-        colors[validPointCount * 3 + 2] = color.b;
+          colors[validPointCount * 3] = color.r;
+          colors[validPointCount * 3 + 1] = color.g;
+          colors[validPointCount * 3 + 2] = color.b;
 
-        validPointCount++;
+          validPointCount++;
+        }
       }
     });
 
@@ -207,7 +211,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     }
 
     console.log(`Point cloud updated with ${validPointCount} points. Threshold: ${thresholdValue}, Skew: ${skewValue}, Point Size: ${pointSize}`);
-  }, [pointsData, thresholdValue, skewValue, pointSize, clearScene]);
+  }, [pointsData, thresholdValue, skewValue, pointSize, hideHalfPoints, clearScene]);
 
   useEffect(() => {
     updatePointCloud();

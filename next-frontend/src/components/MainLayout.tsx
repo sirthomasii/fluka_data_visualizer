@@ -24,6 +24,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [minValue, setMinValue] = useState(0);
   const [maxValue, setMaxValue] = useState(100);
+  const [hideHalfPoints, setHideHalfPoints] = useState(false);
 
   const handleThresholdChange = useCallback((value: number) => {
     setThresholdValue(value);
@@ -106,6 +107,8 @@ export function MainLayout({ children }: MainLayoutProps) {
             setSelectedFile={handleSelectedFileChange}
             minValue={minValue}
             maxValue={maxValue}
+            setHideHalfPoints={setHideHalfPoints}
+            hideHalfPoints={hideHalfPoints}
           />
         </Box>
         <Box style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
@@ -115,6 +118,7 @@ export function MainLayout({ children }: MainLayoutProps) {
               skewValue={skewValue}
               geometry={geometry}
               pointsData={pointsData}
+              hideHalfPoints={hideHalfPoints}
             />
           </div>
           {children}
