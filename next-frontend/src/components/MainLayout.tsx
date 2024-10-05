@@ -83,7 +83,14 @@ export function MainLayout({ children }: MainLayoutProps) {
   }, [selectedFile]);
 
   return (
-    <Container size="xl" style={{ height: '100vh', padding: 0 }}>
+    <Container 
+      size="xl" 
+      style={{ 
+        height: '100vh', 
+        padding: 0,
+        boxShadow: '0 4px 10px 0 rgba(0, 0, 0, 0.8), 0 6px 20px 0 rgba(0, 0, 0, 0.8)'
+      }}
+    >
       <Flex style={{ height: '100%' }}>
         <Box w={300} style={{ flexShrink: 0 }}>
           <DoubleNavbar
@@ -100,14 +107,12 @@ export function MainLayout({ children }: MainLayoutProps) {
           />
         </Box>
         <Box style={{ flex: 1, position: 'relative', height: '100%' }}>
-          {pointsData.length > 0 && (
-            <PointCloudScene
-              thresholdValue={thresholdValue}
-              skewValue={skewValue}
-              pointsData={pointsData}
-              hideHalfPoints={hideHalfPoints}
-            />
-          )}
+          <PointCloudScene
+            thresholdValue={thresholdValue}
+            skewValue={skewValue}
+            pointsData={pointsData}
+            hideHalfPoints={hideHalfPoints}
+          />
           {children}
         </Box>
       </Flex>

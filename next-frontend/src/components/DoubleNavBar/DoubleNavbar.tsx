@@ -49,7 +49,8 @@ export function DoubleNavbar({
   hideHalfPoints,
   setHideHalfPoints
 }: DoubleNavbarProps) {
-  const [active, setActive] = useState(0);
+  // Change the initial state to 1 (Dashboard)
+  const [active, setActive] = useState(1);
   const [beamEnergy, setBeamEnergy] = useState<string>('');
   const [beamSize, setBeamSize] = useState<string>('');
   const [material, setMaterial] = useState<string>('');

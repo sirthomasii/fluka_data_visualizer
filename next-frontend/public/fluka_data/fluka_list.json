@@ -1,0 +1,66 @@
+{
+  "BEAM_ENERGY": [
+    "-0,01",
+    "-0,05",
+    "-0,1",
+    "-0,2"
+  ],
+  "BEAM_SIZE": [
+    "-0,05",
+    "-0,1",
+    "-0,2"
+  ],
+  "MATERIAL": [
+    "CARBON"
+  ],
+  "files": [
+    {
+      "key": "-0,01_-0,05_CARBON",
+      "filename": "BEAM_ENERGY__-0,01__BEAM_SIZE__-0,05__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,01_-0,1_CARBON",
+      "filename": "BEAM_ENERGY__-0,01__BEAM_SIZE__-0,1__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,01_-0,2_CARBON",
+      "filename": "BEAM_ENERGY__-0,01__BEAM_SIZE__-0,2__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,05_-0,05_CARBON",
+      "filename": "BEAM_ENERGY__-0,05__BEAM_SIZE__-0,05__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,05_-0,1_CARBON",
+      "filename": "BEAM_ENERGY__-0,05__BEAM_SIZE__-0,1__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,05_-0,2_CARBON",
+      "filename": "BEAM_ENERGY__-0,05__BEAM_SIZE__-0,2__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,1_-0,05_CARBON",
+      "filename": "BEAM_ENERGY__-0,1__BEAM_SIZE__-0,05__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,1_-0,1_CARBON",
+      "filename": "BEAM_ENERGY__-0,1__BEAM_SIZE__-0,1__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,1_-0,2_CARBON",
+      "filename": "BEAM_ENERGY__-0,1__BEAM_SIZE__-0,2__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,2_-0,05_CARBON",
+      "filename": "BEAM_ENERGY__-0,2__BEAM_SIZE__-0,05__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,2_-0,1_CARBON",
+      "filename": "BEAM_ENERGY__-0,2__BEAM_SIZE__-0,1__MATERIAL__CARBON.csv"
+    },
+    {
+      "key": "-0,2_-0,2_CARBON",
+      "filename": "BEAM_ENERGY__-0,2__BEAM_SIZE__-0,2__MATERIAL__CARBON.csv"
+    }
+  ]
+}

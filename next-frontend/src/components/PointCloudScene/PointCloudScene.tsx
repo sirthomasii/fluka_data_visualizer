@@ -46,7 +46,6 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
-    // Set up isometric view
     camera.position.set(5, 5, 5);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
@@ -68,11 +67,17 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     const axesHelper = new THREE.AxesHelper(5);
     scene.add(axesHelper);
     axesRef.current = axesHelper;
+    console.log('Axes helper added to scene');
 
     // Add grid floor
     const gridHelper = new THREE.GridHelper(10, 10);
     scene.add(gridHelper);
     gridRef.current = gridHelper;
+    console.log('Grid helper added to scene');
+
+    // Perform initial render
+    renderer.render(scene, camera);
+    console.log('Initial render performed');
 
     const animate = () => {
       requestAnimationFrame(animate);
@@ -80,6 +85,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
       renderer.render(scene, camera);
     };
     animate();
+    console.log('Animation loop started');
   }, []);
 
   useEffect(() => {
@@ -109,9 +115,10 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
       return;
     }
 
-    try {
-      clearScene();
+    // Call clearScene at the beginning of updatePointCloud
+    clearScene();
 
+    try {
       const randomlyDisplacePoint = (point: THREE.Vector3): void => {
         const displacementScale = pointSize / 800;
         const randomVector = new THREE.Vector3(
@@ -172,7 +179,8 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
         if (point.value >= thresholdValue) {
           // Only add points if not hiding half or if the point is in the visible half
           if (!hideHalfPoints || point.x <= 0) {
-            const pointVector = new THREE.Vector3(point.x, -point.z, point.y);
+            // Change this line:
+            const pointVector = new THREE.Vector3(point.x, point.y, point.z);
             
             // Randomly displace the point
             randomlyDisplacePoint(pointVector);
@@ -206,11 +214,10 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
 
       const pointCloud = new THREE.Points(geometry, material);
       
-      // Rotate point cloud 90 degrees around X-axis
-      pointCloud.rotation.x = -Math.PI / 2;
-      
+      // Remove this line:
+      // pointCloud.rotation.x = Math.PI / 2;
       sceneRef.current.add(pointCloud);
-      pointCloudRef.current = pointCloud;
+      pointCloudRef.current = pointCloud; // Store the reference to the new point cloud
 
       if (isInitialRender.current && cameraRef.current && controlsRef.current) {
         const box = new THREE.Box3().setFromObject(pointCloud);

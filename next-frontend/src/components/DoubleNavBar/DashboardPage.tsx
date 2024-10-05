@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Slider, Stack, Select, Text, Button } from '@mantine/core';
+import flukaData from '../../../public/fluka_data/fluka_list.json';
 
 interface DashboardPageProps {
   thresholdValue: number;
@@ -40,9 +41,10 @@ export function DashboardPage({
   const [flukaParams, setFlukaParams] = useState<FlukaParams | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/get_fluka_files')
-      .then(response => response.json())
-      .then(data => setFlukaParams(data));
+    const transformedFiles = Object.fromEntries(
+      flukaData.files.map(file => [file.key, file.filename])
+    );
+    setFlukaParams({ ...flukaData, files: transformedFiles });
   }, []);
 
   useEffect(() => {
