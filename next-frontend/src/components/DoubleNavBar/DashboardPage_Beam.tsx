@@ -46,14 +46,14 @@ export function DashboardPage_Beam({
     );
     setFlukaParams({ ...flukaData, files: transformedFiles });
 
-    // Set default values for dropdowns
-    if (flukaData.BEAM_ENERGY.length > 0) setBeamEnergy(flukaData.BEAM_ENERGY[0]);
-    if (flukaData.BEAM_SIZE.length > 0) setBeamSize(flukaData.BEAM_SIZE[0]);
-    if (flukaData.MATERIAL.length > 0) setMaterial(flukaData.MATERIAL[0]);
+    // Only set default values if they're not already set
+    if (!beamEnergy && flukaData.BEAM_ENERGY.length > 0) setBeamEnergy(flukaData.BEAM_ENERGY[0]);
+    if (!beamSize && flukaData.BEAM_SIZE.length > 0) setBeamSize(flukaData.BEAM_SIZE[0]);
+    if (!material && flukaData.MATERIAL.length > 0) setMaterial(flukaData.MATERIAL[0]);
     
-    // Set default skew value to 5.0
-    setSkewValue(5.0);
-  }, []);
+    // Only set default skew value if it's not already set
+    if (skewValue === 0) setSkewValue(5.0);
+  }, [beamEnergy, beamSize, material, skewValue]);
 
   useEffect(() => {
     if (flukaParams && beamEnergy && beamSize && material) {

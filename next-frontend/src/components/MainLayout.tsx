@@ -30,6 +30,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [simulationType, setSimulationType] = useState<'beam' | 'fractal'>('beam');
   const [fractalType, setFractalType] = useState<string | null>(null);
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
   const handleThresholdChange = useCallback((value: number) => {
     setThresholdValue(value);
   }, []);
@@ -96,8 +98,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   }, [selectedFile]);
 
   useEffect(() => {
-    // Set initial values and load the first file
-    if (flukaData.BEAM_ENERGY.length > 0 && 
+    // Only set initial values if they haven't been set before
+    if (!isInitialized && flukaData.BEAM_ENERGY.length > 0 && 
         flukaData.BEAM_SIZE.length > 0 && 
         flukaData.MATERIAL.length > 0) {
       const initialBeamEnergy = flukaData.BEAM_ENERGY[0];
@@ -114,8 +116,10 @@ export function MainLayout({ children }: MainLayoutProps) {
       if (initialFileName) {
         setSelectedFile(initialFileName);
       }
+
+      setIsInitialized(true);
     }
-  }, []);
+  }, [isInitialized]);
 
   return (
     <Container 
