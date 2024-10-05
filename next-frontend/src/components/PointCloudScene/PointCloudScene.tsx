@@ -33,6 +33,8 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
   const axesRef = useRef<THREE.AxesHelper | null>(null);
   const gridRef = useRef<THREE.GridHelper | null>(null);
 
+  const previousSimulationTypeRef = useRef(simulationType);
+
   const initScene = useCallback(() => {
     console.log('initScene called');
     if (!containerRef.current) {
@@ -177,6 +179,56 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     return { points, colors };
   }, []);
 
+  const fitCameraToGeometry = useCallback((geometry: THREE.BufferGeometry) => {
+    if (!cameraRef.current || !rendererRef.current) return;
+
+    // Compute the bounding box of the geometry
+    geometry.computeBoundingBox();
+    const boundingBox = geometry.boundingBox;
+    if (!boundingBox) return;
+
+    // Calculate the center of the bounding box
+    const center = new THREE.Vector3();
+    boundingBox.getCenter(center);
+
+    // Calculate the size of the bounding box
+    const size = new THREE.Vector3();
+    boundingBox.getSize(size);
+
+    // Calculate the radius of a sphere that would enclose the geometry
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const fov = cameraRef.current.fov * (Math.PI / 180);
+    const cameraDistance = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+
+    // Set up isometric view
+    const isometricAngle = Math.PI / 4; // 45 degrees
+    const cameraX = center.x + cameraDistance * Math.cos(isometricAngle);
+    const cameraY = center.y + cameraDistance * Math.sin(isometricAngle);
+    const cameraZ = center.z + cameraDistance * Math.sin(isometricAngle);
+
+    // Position the camera
+    cameraRef.current.position.set(cameraX, cameraY, cameraZ);
+
+    // Look at the center of the geometry
+    cameraRef.current.lookAt(center);
+
+    // Update the camera's near and far planes
+    cameraRef.current.near = cameraDistance / 100;
+    cameraRef.current.far = cameraDistance * 100;
+
+    // Update the camera
+    cameraRef.current.updateProjectionMatrix();
+
+    // Update the controls target to the center of the geometry
+    if (controlsRef.current) {
+      controlsRef.current.target.copy(center);
+      controlsRef.current.update();
+    }
+
+    // Render the scene
+    rendererRef.current.render(sceneRef.current!, cameraRef.current);
+  }, []);
+
   const updatePointCloud = useCallback(() => {
     clearScene();
 
@@ -311,14 +363,14 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     sceneRef.current.add(pointCloud);
     pointCloudRef.current = pointCloud;
 
-    // ... (keep the existing camera positioning logic)
-
-    if (rendererRef.current && cameraRef.current) {
-      rendererRef.current.render(sceneRef.current, cameraRef.current);
+    // Only fit camera if it's the first render or if simulation type has changed
+    if (!previousSimulationTypeRef.current || previousSimulationTypeRef.current !== simulationType) {
+      fitCameraToGeometry(geometry);
+      previousSimulationTypeRef.current = simulationType;
     }
 
     console.log(`Max value: ${maxValue}, Valid points: ${validPointCount}`);
-  }, [pointsData, thresholdValue, skewValue, clearScene, simulationType, fractalType, generateMandelbulb, generateStrangeAttractor, pointSize]);
+  }, [pointsData, thresholdValue, skewValue, clearScene, simulationType, fractalType, generateMandelbulb, generateStrangeAttractor, pointSize, fitCameraToGeometry]);
 
   useEffect(() => {
     console.log('PointCloudScene useEffect triggered');
