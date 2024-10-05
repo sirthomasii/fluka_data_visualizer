@@ -23,7 +23,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [minValue, setMinValue] = useState(0);
   const [maxValue, setMaxValue] = useState(100);
-  const [hideHalfPoints, setHideHalfPoints] = useState(true); // Changed to true
+  const [hideHalfPoints, setHideHalfPoints] = useState(false);
   const [beamEnergy, setBeamEnergy] = useState<string>('');
   const [beamSize, setBeamSize] = useState<string>('');
   const [material, setMaterial] = useState<string>('');

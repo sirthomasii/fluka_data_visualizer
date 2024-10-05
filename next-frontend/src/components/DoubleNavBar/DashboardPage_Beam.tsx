@@ -144,8 +144,8 @@ export function DashboardPage_Beam({
         />
         <Button 
           onClick={() => setHideHalfPoints(!hideHalfPoints)}
-          variant={hideHalfPoints ? "outline" : "filled"} // Changed this line
-          color="purple"
+          variant={hideHalfPoints ? "outline" : "filled"}
+          color="purple" // Change the button color to blue
         >
           {hideHalfPoints ? "Show All Points" : "Hide Half Points"}
         </Button>
