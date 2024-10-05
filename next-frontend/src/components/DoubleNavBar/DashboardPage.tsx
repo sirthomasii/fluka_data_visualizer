@@ -45,6 +45,14 @@ export function DashboardPage({
       flukaData.files.map(file => [file.key, file.filename])
     );
     setFlukaParams({ ...flukaData, files: transformedFiles });
+
+    // Set default values for dropdowns
+    if (flukaData.BEAM_ENERGY.length > 0) setBeamEnergy(flukaData.BEAM_ENERGY[0]);
+    if (flukaData.BEAM_SIZE.length > 0) setBeamSize(flukaData.BEAM_SIZE[0]);
+    if (flukaData.MATERIAL.length > 0) setMaterial(flukaData.MATERIAL[0]);
+    
+    // Set default skew value to 5.0
+    setSkewValue(5.0);
   }, []);
 
   useEffect(() => {
@@ -135,6 +143,7 @@ export function DashboardPage({
         <Button 
           onClick={() => setHideHalfPoints(!hideHalfPoints)}
           variant={hideHalfPoints ? "filled" : "outline"}
+          color="blue" // Change the button color to blue
         >
           {hideHalfPoints ? "Show All Points" : "Hide Half Points"}
         </Button>

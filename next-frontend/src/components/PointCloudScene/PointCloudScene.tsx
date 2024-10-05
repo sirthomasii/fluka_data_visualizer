@@ -133,21 +133,18 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
       const positions = new Float32Array(pointsData.length * 3);
       const colors = new Float32Array(pointsData.length * 3);
 
-      let minValue = Infinity;
       let maxValue = -Infinity;
       let validPointCount = 0;
 
       pointsData.forEach((point) => {
         if (point.value >= thresholdValue) {
-          minValue = Math.min(minValue, point.value);
           maxValue = Math.max(maxValue, point.value);
         }
       });
 
-      // Ensure minValue is positive for log scale
-      minValue = Math.max(minValue, 1e-6);
-
-      const logMinValue = Math.log(minValue);
+      // Use a fixed minimum value for color mapping
+      const fixedMinValue = 1e-6; // You can adjust this value as needed
+      const logMinValue = Math.log(fixedMinValue);
       const logMaxValue = Math.log(maxValue);
 
       const jetMap = (t: number): THREE.Color => {
@@ -163,7 +160,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
 
       const getColor = (value: number) => {
         // Apply log scale
-        const logValue = Math.log(Math.max(value, minValue));
+        const logValue = Math.log(Math.max(value, fixedMinValue));
         
         // Normalize the log value
         let t = (logValue - logMinValue) / (logMaxValue - logMinValue);

@@ -3,6 +3,7 @@ import { Container, Flex, Box } from '@mantine/core';
 import { DoubleNavbar } from './DoubleNavBar/DoubleNavbar';
 import PointCloudScene from './PointCloudScene/PointCloudScene';
 import Papa from 'papaparse';
+import flukaData from '../../public/fluka_data/fluka_list.json';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -17,12 +18,15 @@ interface DataPoint {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const [thresholdValue, setThresholdValue] = useState(0);
-  const [skewValue, setSkewValue] = useState(0.5);
+  const [skewValue, setSkewValue] = useState(5.0); // Set initial value to 5.0
   const [pointsData, setPointsData] = useState<DataPoint[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [minValue, setMinValue] = useState(0);
   const [maxValue, setMaxValue] = useState(100);
   const [hideHalfPoints, setHideHalfPoints] = useState(false);
+  const [beamEnergy, setBeamEnergy] = useState<string>('');
+  const [beamSize, setBeamSize] = useState<string>('');
+  const [material, setMaterial] = useState<string>('');
 
   const handleThresholdChange = useCallback((value: number) => {
     setThresholdValue(value);
@@ -82,6 +86,28 @@ export function MainLayout({ children }: MainLayoutProps) {
     }
   }, [selectedFile]);
 
+  useEffect(() => {
+    // Set initial values and load the first file
+    if (flukaData.BEAM_ENERGY.length > 0 && 
+        flukaData.BEAM_SIZE.length > 0 && 
+        flukaData.MATERIAL.length > 0) {
+      const initialBeamEnergy = flukaData.BEAM_ENERGY[0];
+      const initialBeamSize = flukaData.BEAM_SIZE[0];
+      const initialMaterial = flukaData.MATERIAL[0];
+      
+      setBeamEnergy(initialBeamEnergy);
+      setBeamSize(initialBeamSize);
+      setMaterial(initialMaterial);
+
+      const initialFileKey = `${initialBeamEnergy}_${initialBeamSize}_${initialMaterial}`;
+      const initialFileName = flukaData.files.find(file => file.key === initialFileKey)?.filename;
+      
+      if (initialFileName) {
+        setSelectedFile(initialFileName);
+      }
+    }
+  }, []);
+
   return (
     <Container 
       size="xl" 
@@ -104,6 +130,12 @@ export function MainLayout({ children }: MainLayoutProps) {
             maxValue={maxValue}
             setHideHalfPoints={setHideHalfPoints}
             hideHalfPoints={hideHalfPoints}
+            beamEnergy={beamEnergy}
+            setBeamEnergy={setBeamEnergy}
+            beamSize={beamSize}
+            setBeamSize={setBeamSize}
+            material={material}
+            setMaterial={setMaterial}
           />
         </Box>
         <Box style={{ flex: 1, position: 'relative', height: '100%' }}>

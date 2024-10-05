@@ -27,6 +27,12 @@ interface DoubleNavbarProps {
   maxValue: number;
   hideHalfPoints: boolean;
   setHideHalfPoints: (hide: boolean) => void;
+  beamEnergy: string;
+  setBeamEnergy: (value: string) => void;
+  beamSize: string;
+  setBeamSize: (value: string) => void;
+  material: string;
+  setMaterial: (value: string) => void;
 }
 
 const mainLinksMockdata = [
@@ -47,13 +53,16 @@ export function DoubleNavbar({
   minValue,
   maxValue,
   hideHalfPoints,
-  setHideHalfPoints
+  setHideHalfPoints,
+  beamEnergy,
+  setBeamEnergy,
+  beamSize,
+  setBeamSize,
+  material,
+  setMaterial
 }: DoubleNavbarProps) {
   // Change the initial state to 1 (Dashboard)
   const [active, setActive] = useState(1);
-  const [beamEnergy, setBeamEnergy] = useState<string>('');
-  const [beamSize, setBeamSize] = useState<string>('');
-  const [material, setMaterial] = useState<string>('');
 
   const mainLinks = mainLinksMockdata.map((link, index) => (
     <Tooltip
