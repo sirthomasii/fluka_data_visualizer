@@ -38,6 +38,13 @@ export function MainLayout({ children }: MainLayoutProps) {
     setSkewValue(value);
   }, []);
 
+  const handleSimulationTypeChange = useCallback((type: 'beam' | 'fractal') => {
+    setSimulationType(type);
+    if (type === 'fractal') {
+      setFractalType('mandelbulb');
+    }
+  }, []);
+
   useEffect(() => {
     if (selectedFile) {
       console.log('Fetching file:', selectedFile);
@@ -139,8 +146,8 @@ export function MainLayout({ children }: MainLayoutProps) {
             material={material}
             setMaterial={setMaterial}
             simulationType={simulationType}
-            setSimulationType={setSimulationType}
-            fractalType={fractalType}
+            setSimulationType={handleSimulationTypeChange}
+            fractalType={fractalType || "mandelbulb"}
             setFractalType={setFractalType}
           />
         </Box>
@@ -151,7 +158,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             pointsData={pointsData}
             hideHalfPoints={hideHalfPoints}
             simulationType={simulationType}
-            fractalType={fractalType}
+            fractalType={fractalType as "mandelbulb" | "strangeAttractor" || "mandelbulb"}
           />
           {children}
         </Box>

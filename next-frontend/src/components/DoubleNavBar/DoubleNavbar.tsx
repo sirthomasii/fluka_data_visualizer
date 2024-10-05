@@ -71,8 +71,8 @@ export function DoubleNavbar({
   fractalType,
   setFractalType
 }: DoubleNavbarProps) {
-  // Change the initial state to 1 (Dashboard)
-  const [active, setActive] = useState(1);
+  // Change the initial state to 0 (Home)
+  const [active, setActive] = useState(0);
 
   const mainLinks = mainLinksMockdata.map((link, index) => (
     <Tooltip
@@ -95,7 +95,10 @@ export function DoubleNavbar({
   const renderContent = () => {
     switch (active) {
       case 0: // Home
-        return <HomePage setSimulationType={setSimulationType} />;
+        return <HomePage setSimulationType={(type) => {
+          setSimulationType(type);
+          setActive(1); // Move to Dashboard when a simulation type is selected
+        }} />;
       case 1: // Dashboard
         return simulationType === 'beam' ? (
           <DashboardPage_Beam

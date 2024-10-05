@@ -100,16 +100,16 @@ export function DashboardPage_Beam({
         {flukaParams && (
           <>
             <Select
-              label="Beam Energy"
+              label="Beam Energy (GeV)"
               value={beamEnergy}
               onChange={(value) => setBeamEnergy(value as string)}
-              data={flukaParams.BEAM_ENERGY?.map(energy => ({ value: energy, label: energy })) || []}
+              data={flukaParams.BEAM_ENERGY?.map(energy => ({ value: energy, label: `${energy} GeV` })) || []}
             />
             <Select
-              label="Beam Size"
+              label="Beam Size (cm)"
               value={beamSize}
               onChange={(value) => setBeamSize(value as string)}
-              data={flukaParams.BEAM_SIZE?.map(size => ({ value: size, label: size })) || []}
+              data={flukaParams.BEAM_SIZE?.map(size => ({ value: size, label: `${size} cm` })) || []}
             />
             <Select
               label="Material"
