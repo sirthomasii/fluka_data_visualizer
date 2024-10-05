@@ -33,18 +33,7 @@ export default function HomePage() {
 
   return (
     <MainLayout>
-      {/* <Container size="xl" p={0} style={{ height: '100vh' }}>
-        <Flex style={{ height: '100%' }}>
-          <Box w="75%" h="100%" style={{ position: 'relative', overflow: 'hidden' }}>
-            {error && <p>Error fetching data: {error.message}</p>}
-            {data ? (
-              <pre>{JSON.stringify(data, null, 2)}</pre>
-            ) : (
-              <p>Loading...</p>
-            )}
-          </Box>
-        </Flex>
-      </Container> */}
+      {<></>}
     </MainLayout>
   );
 }
