@@ -13,6 +13,7 @@ import {
   ChartOptions
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { ScriptableContext } from 'chart.js';
 
 ChartJS.register(
   CategoryScale,
@@ -94,7 +95,8 @@ export function AnalyticsPage({ pointsData }: AnalyticsPageProps) {
           fill: false,
           pointRadius: 0,
           segment: {
-            borderColor: ctx => ctx.p0.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
+            borderColor: (ctx: ScriptableContext<'line'>) => 
+              ctx.p0.parsed.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
           }
         }],
       },
@@ -107,7 +109,8 @@ export function AnalyticsPage({ pointsData }: AnalyticsPageProps) {
           fill: false,
           pointRadius: 0,
           segment: {
-            borderColor: ctx => ctx.p0.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
+            borderColor: (ctx: ScriptableContext<'line'>) => 
+              ctx.p0.parsed.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
           }
         }],
       },

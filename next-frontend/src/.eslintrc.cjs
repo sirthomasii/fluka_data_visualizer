@@ -1,5 +1,9 @@
 module.exports = {
-  extends: ['mantine', 'plugin:@next/next/recommended', 'plugin:jest/recommended'],
+  extends: [
+    // Remove or comment out the line that extends 'mantine'
+    // 'mantine',
+    // Keep other extends...
+  ],
   plugins: ['testing-library', 'jest'],
   overrides: [
     {
