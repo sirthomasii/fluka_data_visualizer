@@ -148,10 +148,14 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
       if (point.value >= thresholdValue) {
         // Only add points if not hiding half or if the point is in the visible half
         if (!hideHalfPoints || point.x <= 0) {
-          // Rotate the point 90 degrees around X-axis
-          positions[validPointCount * 3] = point.x;
-          positions[validPointCount * 3 + 1] = -point.z; // Negative z becomes y
-          positions[validPointCount * 3 + 2] = point.y; // Y becomes z
+          const pointVector = new THREE.Vector3(point.x, -point.z, point.y);
+          
+          // Randomly displace the point
+          randomlyDisplacePoint(pointVector);
+
+          positions[validPointCount * 3] = pointVector.x;
+          positions[validPointCount * 3 + 1] = pointVector.y;
+          positions[validPointCount * 3 + 2] = pointVector.z;
 
           const color = getColor(point.value);
 
@@ -216,6 +220,16 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
   useEffect(() => {
     updatePointCloud();
   }, [updatePointCloud]);
+
+  const randomlyDisplacePoint = (point: THREE.Vector3) => {
+    const displacementScale = pointSize / 800;
+    const randomVector = new THREE.Vector3(
+      (Math.random() - 0.5) * 2 * displacementScale,
+      (Math.random() - 0.5) * 2 * displacementScale,
+      (Math.random() - 0.5) * 2 * displacementScale
+    );
+    point.add(randomVector);
+  };
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 });
