@@ -12,7 +12,7 @@ import {
   // IconSettings,
 } from '@tabler/icons-react';
 import classes from './DoubleNavbar.module.css';
-// import { HomePage } from './HomePage';
+import { HomePage } from './HomePage';
 import { DashboardPage } from './DashboardPage';
 import { AnalyticsPage } from './AnalyticsPage';
 
@@ -85,7 +85,7 @@ export function DoubleNavbar({
   const renderContent = () => {
     switch (active) {
       case 0: // Home
-        return <div>Home Page Content</div>;
+        return <HomePage />;
       case 1: // Dashboard
         return (
           <DashboardPage
