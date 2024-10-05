@@ -102,7 +102,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     if (!isInitialized && flukaData.BEAM_ENERGY.length > 0 && 
         flukaData.BEAM_SIZE.length > 0 && 
         flukaData.MATERIAL.length > 0) {
-      const initialBeamEnergy = flukaData.BEAM_ENERGY[0];
+      const initialBeamEnergy = flukaData.BEAM_ENERGY[1];
       const initialBeamSize = flukaData.BEAM_SIZE[0];
       const initialMaterial = flukaData.MATERIAL[0];
       
