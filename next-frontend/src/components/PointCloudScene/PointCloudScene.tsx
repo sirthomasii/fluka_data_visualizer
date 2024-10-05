@@ -18,9 +18,11 @@ interface PointCloudSceneProps {
   pointsData: DataPoint[];
   pointSize?: number;
   hideHalfPoints: boolean;
+  simulationType: 'beam' | 'fractal';
+  fractalType: string | null;
 }
 
-const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdValue, skewValue, pointsData, pointSize = 2.5, hideHalfPoints }) => {
+const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdValue, skewValue, pointsData, pointSize = 2.5, hideHalfPoints, simulationType, fractalType }) => {
   console.log('PointCloudScene rendered', { pointsDataLength: pointsData.length, thresholdValue, skewValue, pointSize, hideHalfPoints });
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -249,7 +251,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
         console.error('Error stack:', error.stack);
       }
     }
-  }, [pointsData, thresholdValue, skewValue, pointSize, hideHalfPoints, clearScene]);
+  }, [pointsData, thresholdValue, skewValue, pointSize, hideHalfPoints, clearScene, simulationType, fractalType]);
 
   useEffect(() => {
     console.log('PointCloudScene useEffect triggered');

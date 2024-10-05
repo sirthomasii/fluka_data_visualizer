@@ -13,8 +13,10 @@ import {
 } from '@tabler/icons-react';
 import classes from './DoubleNavbar.module.css';
 import { HomePage } from './HomePage';
-import { DashboardPage } from './DashboardPage';
-import { AnalyticsPage } from './AnalyticsPage';
+import { DashboardPage_Beam } from './DashboardPage_Beam';
+import { DashboardPage_Fractal } from './DashboardPage_Fractal';
+import { AnalyticsPage_Beam } from './AnalyticsPage_Beam';
+import { AnalyticsPage_Fractal } from './AnalyticsPage_Fractal';
 
 interface DoubleNavbarProps {
   thresholdValue: number;
@@ -33,6 +35,10 @@ interface DoubleNavbarProps {
   setBeamSize: (value: string) => void;
   material: string;
   setMaterial: (value: string) => void;
+  simulationType: 'beam' | 'fractal';
+  setSimulationType: (type: 'beam' | 'fractal') => void;
+  fractalType: string | null;
+  setFractalType: (type: string | null) => void;
 }
 
 const mainLinksMockdata = [
@@ -59,7 +65,11 @@ export function DoubleNavbar({
   beamSize,
   setBeamSize,
   material,
-  setMaterial
+  setMaterial,
+  simulationType,
+  setSimulationType,
+  fractalType,
+  setFractalType
 }: DoubleNavbarProps) {
   // Change the initial state to 1 (Dashboard)
   const [active, setActive] = useState(1);
@@ -85,10 +95,10 @@ export function DoubleNavbar({
   const renderContent = () => {
     switch (active) {
       case 0: // Home
-        return <HomePage />;
+        return <HomePage setSimulationType={setSimulationType} />;
       case 1: // Dashboard
-        return (
-          <DashboardPage
+        return simulationType === 'beam' ? (
+          <DashboardPage_Beam
             thresholdValue={thresholdValue}
             setThresholdValue={setThresholdValue}
             skewValue={skewValue}
@@ -105,11 +115,18 @@ export function DoubleNavbar({
             hideHalfPoints={hideHalfPoints}
             setHideHalfPoints={setHideHalfPoints}
           />
+        ) : (
+          <DashboardPage_Fractal
+            fractalType={fractalType}
+            setFractalType={setFractalType}
+          />
         );
       case 2: // Analytics
         console.log("DoubleNavbar pointsData:", pointsData);
-        return (
-          <AnalyticsPage pointsData={pointsData} />
+        return simulationType === 'beam' ? (
+          <AnalyticsPage_Beam pointsData={pointsData} />
+        ) : (
+          <AnalyticsPage_Fractal fractalType={fractalType} />
         );
       // ... other cases ...
       default:

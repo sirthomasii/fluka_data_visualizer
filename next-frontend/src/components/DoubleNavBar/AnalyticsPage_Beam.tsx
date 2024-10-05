@@ -36,11 +36,9 @@ interface DataPoint {
   value: number;
 }
 
-interface AnalyticsPageProps {
-  pointsData: DataPoint[];
-}
+// Remove unused AnalyticsPageProps interface
 
-export function AnalyticsPage({ pointsData }: AnalyticsPageProps) {
+export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) {
   const analysisResults = useMemo(() => {
     const numPoints = pointsData.length;
     let highestValue = -Infinity;

@@ -27,7 +27,7 @@ interface FlukaParams {
   files: { [key: string]: string };
 }
 
-export function DashboardPage({ 
+export function DashboardPage_Beam({ 
   thresholdValue, setThresholdValue,
   skewValue, setSkewValue,
   setSelectedFile,

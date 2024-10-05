@@ -27,6 +27,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [beamEnergy, setBeamEnergy] = useState<string>('');
   const [beamSize, setBeamSize] = useState<string>('');
   const [material, setMaterial] = useState<string>('');
+  const [simulationType, setSimulationType] = useState<'beam' | 'fractal'>('beam');
+  const [fractalType, setFractalType] = useState<string | null>(null);
 
   const handleThresholdChange = useCallback((value: number) => {
     setThresholdValue(value);
@@ -136,6 +138,10 @@ export function MainLayout({ children }: MainLayoutProps) {
             setBeamSize={setBeamSize}
             material={material}
             setMaterial={setMaterial}
+            simulationType={simulationType}
+            setSimulationType={setSimulationType}
+            fractalType={fractalType}
+            setFractalType={setFractalType}
           />
         </Box>
         <Box style={{ flex: 1, position: 'relative', height: '100%' }}>
@@ -144,6 +150,8 @@ export function MainLayout({ children }: MainLayoutProps) {
             skewValue={skewValue}
             pointsData={pointsData}
             hideHalfPoints={hideHalfPoints}
+            simulationType={simulationType}
+            fractalType={fractalType}
           />
           {children}
         </Box>
