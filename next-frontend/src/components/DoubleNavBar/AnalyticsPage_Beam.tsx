@@ -9,6 +9,7 @@ import {
   Title, 
   Tooltip, 
   Legend,
+  LogarithmicScale,
   ChartOptions
 } from 'chart.js';
 import dynamic from 'next/dynamic';
@@ -22,6 +23,7 @@ import { ScriptableLineSegmentContext } from 'chart.js';
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  LogarithmicScale,  // Add this line
   PointElement,
   LineElement,
   Title,
@@ -74,7 +76,7 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
 
       sample.forEach(point => {
         lines.push({ x: point[axis], y: 0 });
-        lines.push({ x: point[axis], y: point.value });
+        lines.push({ x: point[axis], y: point.value });  // Keep this as 'value'
         lines.push({ x: point[axis], y: NaN }); // NaN creates a break in the line
       });
 
@@ -86,7 +88,7 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
     return {
       yyData: {
         datasets: [{
-          label: 'Y vs Value',
+          label: 'Y vs Energy',  // Change this label
           data: createRandomSample(pointsData, 'y', sampleSize),
           borderColor: 'rgb(75, 192, 192)',
           borderWidth: 0.5,
@@ -100,7 +102,7 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
       },
       zzData: {
         datasets: [{
-          label: 'Z vs Value',
+          label: 'Z vs Energy',  // Change this label
           data: createRandomSample(pointsData, 'z', sampleSize),
           borderColor: 'rgb(75, 192, 192)',
           borderWidth: 0.5,
@@ -138,12 +140,18 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
         }
       },
       y: {
+        type: 'linear',
         title: {
           display: true,
-          text: 'Value'
+          text: 'Energy'
         },
         position: 'left' as const,
-        beginAtZero: true
+        min: 0.1, // Adjust this value based on your data range
+        ticks: {
+          callback: function(value) {
+            return Number(value.toString()).toExponential();
+          }
+        }
       }
     },
     layout: {
@@ -162,18 +170,20 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
 
   return (
     <Stack gap="md" style={{ width: '100%', maxWidth: '100%' }}>
+      <h3>Beam Simulation Analytics</h3>
+
       <Group>
         <Text>Number of points: {analysisResults.numPoints}</Text>
         <Text>Highest value: {analysisResults.highestValue.toFixed(2)}</Text>
         <Text>Average value: {analysisResults.avgValue.toFixed(2)}</Text>
       </Group>
 
-      <Text size="lg" fw={500}>Y vs Value (Random Sample)</Text>
+      <Text size="lg" fw={500}>Y vs Energy</Text>
       <div style={{ height: '150px', width: '100%', maxWidth: '100%', position: 'relative' }}>
         <Line data={chartData.yyData} options={chartOptions} />
       </div>
 
-      <Text size="lg" fw={500}>Z vs Value (Random Sample)</Text>
+      <Text size="lg" fw={500}>Z vs Energy</Text>
       <div style={{ height: '150px', width: '100%', maxWidth: '100%', position: 'relative' }}>
         <Line data={chartData.zzData} options={chartOptions} />
       </div>

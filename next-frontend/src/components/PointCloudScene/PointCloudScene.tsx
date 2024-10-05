@@ -33,9 +33,10 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
   const axesRef = useRef<THREE.AxesHelper | null>(null);
   const gridRef = useRef<THREE.GridHelper | null>(null);
 
-  const previousSimulationTypeRef = useRef(simulationType);
-
   const [frame, setFrame] = useState(0);
+  const [shouldFitCamera, setShouldFitCamera] = useState(true);
+  const [isNewSimulation, setIsNewSimulation] = useState(true);
+  const [isGeometryLoaded, setIsGeometryLoaded] = useState(false);
 
   const initScene = useCallback(() => {
     console.log('initScene called');
@@ -371,23 +372,37 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     sceneRef.current.add(pointCloud);
     pointCloudRef.current = pointCloud;
 
-    // Only fit camera if it's the first render or if simulation type has changed
-    if (previousSimulationTypeRef.current !== simulationType) {
-      fitCameraToGeometry(geometry);
-      previousSimulationTypeRef.current = simulationType;
-    }
-
     if (simulationType === 'fractal' && fractalType === 'mandelbulb') {
-      setFrame(prevFrame => prevFrame + 1); // Increment frame counter
+      setFrame(prevFrame => prevFrame + 1);
     }
 
     console.log(`Max value: ${maxValue}, Valid points: ${validPointCount}`);
+    setIsGeometryLoaded(true);
   }, [pointsData, thresholdValue, skewValue, clearScene, simulationType, fractalType, generateMandelbulb, generateStrangeAttractor, pointSize, hideHalfPoints]);
 
+  // Effect for updating point cloud
   useEffect(() => {
-    console.log('PointCloudScene useEffect triggered');
+    console.log('Updating point cloud');
     updatePointCloud();
-  }, [updatePointCloud, hideHalfPoints]);
+  }, [updatePointCloud]);
+
+  // Effect for handling simulation changes
+  useEffect(() => {
+    console.log('Simulation type or fractal type changed');
+    setIsNewSimulation(true);
+    setShouldFitCamera(true);
+    setIsGeometryLoaded(false);
+  }, [simulationType, fractalType]);
+
+  // Effect for fitting camera when needed
+  useEffect(() => {
+    if (shouldFitCamera && isNewSimulation && isGeometryLoaded && pointCloudRef.current) {
+      console.log('Fitting camera to geometry');
+      fitCameraToGeometry(pointCloudRef.current.geometry);
+      setShouldFitCamera(false);
+      setIsNewSimulation(false);
+    }
+  }, [shouldFitCamera, isNewSimulation, isGeometryLoaded, fitCameraToGeometry]);
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 });
