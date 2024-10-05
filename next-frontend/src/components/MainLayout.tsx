@@ -57,9 +57,14 @@ export function MainLayout({ children }: MainLayoutProps) {
           console.log('Valid data points:', validData.length);
 
           if (validData.length > 0) {
-            const values = validData.map(point => point.value);
-            const min = Math.min(...values);
-            const max = Math.max(...values);
+            let min = validData[0].value;
+            let max = validData[0].value;
+
+            for (let i = 1; i < validData.length; i++) {
+              const value = validData[i].value;
+              if (value < min) min = value;
+              if (value > max) max = value;
+            }
 
             setPointsData(validData);
             setMinValue(min);
