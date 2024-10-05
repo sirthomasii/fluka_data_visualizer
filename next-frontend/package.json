@@ -32,17 +32,18 @@
     "three": "^0.169.0"
   },
   "devDependencies": {
+    "@testing-library/user-event": "^14.5.2",
     "@types/node": "^20",
     "@types/papaparse": "^5.3.14",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/testing-library__user-event": "^4.1.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.13",
+    "eslint-plugin-jest": "^27.2.1",
     "eslint-plugin-testing-library": "^6.3.0",
     "node-polyfill-webpack-plugin": "^4.0.0",
-    "typescript": "^5",
-    "eslint-plugin-jest": "^27.2.1" 
-
+    "typescript": "^5"
   },
   "browser": {
     "child_process": false
