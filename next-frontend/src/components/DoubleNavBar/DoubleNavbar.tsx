@@ -122,6 +122,8 @@ export function DoubleNavbar({
           <DashboardPage_Fractal
             fractalType={fractalType}
             setFractalType={setFractalType}
+            hideHalfPoints={hideHalfPoints}
+            setHideHalfPoints={setHideHalfPoints}
           />
         );
       case 2: // Analytics
