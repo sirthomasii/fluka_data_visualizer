@@ -8,6 +8,8 @@ interface DashboardPageProps {
   skewValue: number;
   setSkewValue: (value: number) => void;
   setSelectedFile: (file: string) => void;
+  minValue: number;
+  maxValue: number;
 }
 
 interface FlukaParams {
@@ -20,7 +22,8 @@ interface FlukaParams {
 export function DashboardPage({ 
   thresholdValue, setThresholdValue,
   skewValue, setSkewValue,
-  setSelectedFile
+  setSelectedFile,
+  minValue, maxValue
 }: DashboardPageProps) {
   const [flukaParams, setFlukaParams] = useState<FlukaParams | null>(null);
   const [beamEnergy, setBeamEnergy] = useState<string>('');
@@ -44,14 +47,33 @@ export function DashboardPage({
   }, [flukaParams, beamEnergy, beamSize, material, setSelectedFile]);
 
   const handleThresholdChange = (value: number) => {
-    console.log('Threshold value changed:', value);
-    setThresholdValue(value);
+    if (!isNaN(value) && isFinite(value)) {
+      console.log('Threshold value changed:', value);
+      // Ensure the value is within the valid range
+      const clampedValue = Math.max(minValue, Math.min(maxValue, value));
+      setThresholdValue(clampedValue);
+    } else {
+      console.error('Invalid threshold value:', value);
+      // Set to minValue if an invalid value is received
+      setThresholdValue(minValue);
+    }
   };
 
   const handleSkewChange = (value: number) => {
-    console.log('Skew value changed:', value);
-    setSkewValue(value);
+    if (!isNaN(value) && isFinite(value)) {
+      console.log('Skew value changed:', value);
+      setSkewValue(value);
+    } else {
+      console.error('Invalid skew value:', value);
+      // Set to default value (e.g., 1) if an invalid value is received
+      setSkewValue(1);
+    }
   };
+
+  // Log current values for debugging
+  useEffect(() => {
+    console.log(`DashboardPage - Current values: Threshold: ${thresholdValue}, Min: ${minValue}, Max: ${maxValue}, Skew: ${skewValue}`);
+  }, [thresholdValue, minValue, maxValue, skewValue]);
 
   return (
     <div>
@@ -80,20 +102,24 @@ export function DashboardPage({
         )}
         <Text size="sm">Lowest Visible Value</Text>
         <Slider
-          min={0}
-          max={100}
+          min={minValue}
+          max={maxValue}
           value={thresholdValue}
           onChange={handleThresholdChange}
           onChangeEnd={(value) => console.log('Threshold slider change ended:', value)}
+          step={(maxValue - minValue) / 1000}
+          labelAlwaysOn
+          label={(value) => value.toExponential(2)}
         />
         <Text size="sm">Color Gradient Skew</Text>
         <Slider
-          min={0}
-          max={1}
-          step={0.01}
+          min={0.1}
+          max={10}
+          step={0.1}
           value={skewValue}
           onChange={handleSkewChange}
           onChangeEnd={(value) => console.log('Skew slider change ended:', value)}
+          labelAlwaysOn
         />
       </Stack>
     </div>

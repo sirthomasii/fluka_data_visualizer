@@ -14,174 +14,56 @@ interface DataPoint {
 interface PointCloudSceneProps {
   thresholdValue: number;
   skewValue: number;
+  geometry: string;
   pointsData: DataPoint[];
+  pointSize?: number;
 }
 
-const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdValue, skewValue, pointsData }) => {
-  const mountRef = useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<DataPoint[]>([]);
-  const [minValue, setMinValue] = useState<number>(Infinity);
-  const [maxValue, setMaxValue] = useState<number>(-Infinity);
+const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdValue, skewValue, geometry, pointsData, pointSize = 2.5 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const pointCloudRef = useRef<THREE.Points | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
-  const isInitialRender = useRef(true);
-
-  const clearScene = useCallback(() => {
-    if (sceneRef.current && pointCloudRef.current) {
-      sceneRef.current.remove(pointCloudRef.current);
-      pointCloudRef.current.geometry.dispose();
-      (pointCloudRef.current.material as THREE.Material).dispose();
-      pointCloudRef.current = null;
-    }
-  }, []);
-
-  const updatePointCloud = useCallback(() => {
-    if (!sceneRef.current || data.length === 0) {
-      console.log('PointCloudScene: No data or scene', { sceneExists: !!sceneRef.current, dataLength: data.length });
-      return;
-    }
-
-    clearScene();
-
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(data.length * 3);
-    const colors = new Float32Array(data.length * 3);
-
-    let minValue = Infinity;
-    let maxValue = -Infinity;
-
-    data.forEach((point, i) => {
-      positions[i * 3] = point.x;
-      positions[i * 3 + 1] = point.y;
-      positions[i * 3 + 2] = point.z;
-
-      minValue = Math.min(minValue, point.value);
-      maxValue = Math.max(maxValue, point.value);
-
-      // Temporary: set all points to red for visibility
-      colors[i * 3] = 1;
-      colors[i * 3 + 1] = 0;
-      colors[i * 3 + 2] = 0;
-    });
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const material = new THREE.PointsMaterial({
-      size: 0.01,  // Increased point size
-      vertexColors: true,
-      sizeAttenuation: false  // Makes points same size regardless of distance
-    });
-
-    const pointCloud = new THREE.Points(geometry, material);
-    sceneRef.current.add(pointCloud);
-    pointCloudRef.current = pointCloud;
-
-    // Compute bounding box instead of sphere
-    geometry.computeBoundingBox();
-    const boundingBox = geometry.boundingBox;
-    
-    if (boundingBox) {
-      const center = new THREE.Vector3();
-      boundingBox.getCenter(center);
-      const size = new THREE.Vector3();
-      boundingBox.getSize(size);
-
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const fov = cameraRef.current!.fov * (Math.PI / 180);
-      let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-
-      cameraZ *= 1.5;  // Zoom out a bit
-
-      cameraRef.current!.position.set(center.x, center.y, center.z + cameraZ);
-      cameraRef.current!.updateProjectionMatrix();
-
-      controlsRef.current!.target.set(center.x, center.y, center.z);
-      controlsRef.current!.update();
-
-      console.log('Camera position:', cameraRef.current!.position);
-      console.log('Controls target:', controlsRef.current!.target);
-    }
-
-    console.log('Point cloud updated with', data.length, 'points');
-  }, [data, clearScene]);
-
-  useEffect(() => {
-    console.log('PointCloudScene received new props:', { thresholdValue, skewValue, dataLength: pointsData.length });
-    if (pointsData.length > 0) {
-      updatePointCloud();
-    }
-  }, [pointsData, thresholdValue, skewValue, updatePointCloud]);
-
-  useEffect(() => {
-    console.log('pointsData changed:', pointsData.length);
-    if (pointsData.length > 0) {
-      const validData = pointsData.filter(point => 
-        isFinite(point.x) && isFinite(point.y) && isFinite(point.z) && isFinite(point.value)
-      );
-      
-      if (validData.length === 0) {
-        console.error('No valid points in the new data');
-        return;
-      }
-
-      setData(validData);
-      
-      let newMinValue = Infinity;
-      let newMaxValue = -Infinity;
-      validData.forEach((point) => {
-        newMinValue = Math.min(newMinValue, point.value);
-        newMaxValue = Math.max(newMaxValue, point.value);
-      });
-      setMinValue(newMinValue);
-      setMaxValue(newMaxValue);
-
-      isInitialRender.current = true;
-
-      console.log(`Set ${validData.length} valid points out of ${pointsData.length} total points`);
-    }
-  }, [pointsData]);
-
-  useEffect(() => {
-    if (data.length > 0) {
-      console.log('Updating point cloud with', data.length, 'points');
-      updatePointCloud();
-
-      if (isInitialRender.current && cameraRef.current && controlsRef.current) {
-        cameraRef.current.position.set(0, 0, 2);
-        controlsRef.current.target.set(0, 0, 0);
-        controlsRef.current.update();
-        isInitialRender.current = false;
-      }
-    }
-  }, [data, updatePointCloud]);
+  const pointCloudRef = useRef<THREE.Points | null>(null);
+  const axesRef = useRef<THREE.AxesHelper | null>(null);
+  const gridRef = useRef<THREE.GridHelper | null>(null);
+  const isInitialRender = useRef<boolean>(true);
 
   const initScene = useCallback(() => {
-    if (!mountRef.current) return;
+    if (!containerRef.current) return;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    mountRef.current.appendChild(renderer.domElement);
-
     sceneRef.current = scene;
-    rendererRef.current = renderer;
+
+    const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
+    // Set up isometric view
+    camera.position.set(5, 5, 5);
+    camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    renderer.setClearColor(0x000000, 1);
+    containerRef.current.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
-    controls.enableZoom = true;
-    controls.minDistance = 1; // Set minimum zoom distance
-    controls.maxDistance = 10; // Set maximum zoom distance
+    controls.screenSpacePanning = false;
+    controls.maxPolarAngle = Math.PI / 2;
     controlsRef.current = controls;
 
-    camera.position.set(0, 0, 2);
+    // Add axes
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
+    axesRef.current = axesHelper;
+
+    // Add grid floor
+    const gridHelper = new THREE.GridHelper(10, 10);
+    scene.add(gridHelper);
+    gridRef.current = gridHelper;
 
     const animate = () => {
       requestAnimationFrame(animate);
@@ -189,66 +71,149 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
       renderer.render(scene, camera);
     };
     animate();
-
-    const handleResize = () => {
-      const width = mountRef.current!.clientWidth;
-      const height = mountRef.current!.clientHeight;
-      renderer.setSize(width, height);
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize();
-
-    const axesHelper = new THREE.AxesHelper(5);
-    sceneRef.current.add(axesHelper);
-
-    const gridHelper = new THREE.GridHelper(10, 10);
-    sceneRef.current.add(gridHelper);
-
-    return () => {
-      console.log('Cleanup function called');
-      window.removeEventListener('resize', handleResize);
-      
-      if (mountRef.current) {
-        console.log('mountRef.current exists');
-        if (renderer && renderer.domElement) {
-          console.log('renderer and domElement exist');
-          if (mountRef.current.contains(renderer.domElement)) {
-            console.log('Attempting to remove renderer.domElement');
-            try {
-              mountRef.current.removeChild(renderer.domElement);
-              console.log('Successfully removed renderer.domElement');
-            } catch (error) {
-              console.error('Error removing renderer.domElement:', error);
-            }
-          } else {
-            console.log('renderer.domElement is not a child of mountRef.current');
-          }
-        } else {
-          console.log('renderer or domElement is undefined');
-        }
-      } else {
-        console.log('mountRef.current is null');
-      }
-    };
   }, []);
 
   useEffect(() => {
-    const cleanup = initScene();
-    return cleanup;
+    initScene();
+    return () => {
+      if (rendererRef.current && containerRef.current) {
+        containerRef.current.removeChild(rendererRef.current.domElement);
+      }
+    };
   }, [initScene]);
+
+  const clearScene = useCallback(() => {
+    if (sceneRef.current && pointCloudRef.current) {
+      sceneRef.current.remove(pointCloudRef.current);
+      pointCloudRef.current = null;
+    }
+  }, []);
+
+  const updatePointCloud = useCallback(() => {
+    if (!sceneRef.current || pointsData.length === 0) {
+      console.log('PointCloudScene: No data or scene', { sceneExists: !!sceneRef.current, dataLength: pointsData.length });
+      return;
+    }
+
+    clearScene();
+
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(pointsData.length * 3);
+    const colors = new Float32Array(pointsData.length * 3);
+
+    let minValue = Infinity;
+    let maxValue = -Infinity;
+    let validPointCount = 0;
+
+    pointsData.forEach((point) => {
+      if (point.value >= thresholdValue) {
+        minValue = Math.min(minValue, point.value);
+        maxValue = Math.max(maxValue, point.value);
+      }
+    });
+
+    // Ensure minValue is positive for log scale
+    minValue = Math.max(minValue, 1e-6);
+
+    const logMinValue = Math.log(minValue);
+    const logMaxValue = Math.log(maxValue);
+
+    const jetMap = (t: number): THREE.Color => {
+      const r = Math.max(0, Math.min(4 * t - 1.5, -4 * t + 4.5));
+      const g = Math.max(0, Math.min(4 * t - 0.5, -4 * t + 3.5));
+      const b = Math.max(0, Math.min(4 * t + 0.5, -4 * t + 2.5));
+      return new THREE.Color(r, g, b);
+    };
+
+    const applySkew = (t: number, skew: number) => {
+      return Math.pow(t, skew);
+    };
+
+    const getColor = (value: number) => {
+      // Apply log scale
+      const logValue = Math.log(Math.max(value, minValue));
+      
+      // Normalize the log value
+      let t = (logValue - logMinValue) / (logMaxValue - logMinValue);
+      
+      // Apply skew
+      t = applySkew(t, skewValue);
+
+      // Map to JET color
+      return jetMap(t);
+    };
+
+    pointsData.forEach((point, i) => {
+      if (point.value >= thresholdValue) {
+        // Rotate the point 90 degrees around X-axis
+        positions[validPointCount * 3] = point.x;
+        positions[validPointCount * 3 + 1] = -point.z; // Negative z becomes y
+        positions[validPointCount * 3 + 2] = point.y; // Y becomes z
+
+        const color = getColor(point.value);
+
+        colors[validPointCount * 3] = color.r;
+        colors[validPointCount * 3 + 1] = color.g;
+        colors[validPointCount * 3 + 2] = color.b;
+
+        validPointCount++;
+      }
+    });
+
+    const trimmedPositions = positions.slice(0, validPointCount * 3);
+    const trimmedColors = colors.slice(0, validPointCount * 3);
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(trimmedPositions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(trimmedColors, 3));
+
+    const material = new THREE.PointsMaterial({
+      size: pointSize,
+      vertexColors: true,
+      sizeAttenuation: false
+    });
+
+    const pointCloud = new THREE.Points(geometry, material);
+    
+    // Rotate point cloud 90 degrees around X-axis
+    pointCloud.rotation.x = -Math.PI / 2;
+    
+    sceneRef.current.add(pointCloud);
+    pointCloudRef.current = pointCloud;
+
+    if (isInitialRender.current && cameraRef.current && controlsRef.current) {
+      const box = new THREE.Box3().setFromObject(pointCloud);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const fov = cameraRef.current.fov * (Math.PI / 180);
+      let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+
+      cameraZ *= 1.5; // Zoom out a little so objects don't fill the screen
+
+      const direction = new THREE.Vector3(1, 1, 1).normalize();
+      cameraRef.current.position.copy(center).add(direction.multiplyScalar(cameraZ));
+      cameraRef.current.lookAt(center);
+      cameraRef.current.updateProjectionMatrix();
+
+      controlsRef.current.target.copy(center);
+      controlsRef.current.update();
+
+      isInitialRender.current = false;
+    }
+
+    if (rendererRef.current && cameraRef.current) {
+      rendererRef.current.render(sceneRef.current, cameraRef.current);
+    }
+
+    console.log(`Point cloud updated with ${validPointCount} points. Threshold: ${thresholdValue}, Skew: ${skewValue}, Point Size: ${pointSize}`);
+  }, [pointsData, thresholdValue, skewValue, pointSize, clearScene]);
 
   useEffect(() => {
     updatePointCloud();
   }, [updatePointCloud]);
 
-  return (
-    <div>
-      <div ref={mountRef} style={{ width: '100%', height: '100vh' }} />
-      {data.length === 0 && <div>Loading point cloud data...</div>}
-    </div>
-  );
+  return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 });
 
-export default React.memo(PointCloudScene);
+export default PointCloudScene;

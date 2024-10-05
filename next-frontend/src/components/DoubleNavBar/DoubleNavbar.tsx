@@ -24,6 +24,8 @@ interface DoubleNavbarProps {
   setGeometry: (geometry: string) => void;
   pointsData: { x: number; y: number; z: number; value: number }[];
   setSelectedFile: (file: string) => void;
+  minValue: number;  // Add this
+  maxValue: number;  // Add this
 }
 
 const mainLinksMockdata = [
@@ -40,7 +42,9 @@ export function DoubleNavbar({
   thresholdValue, setThresholdValue, 
   skewValue, setSkewValue, 
   setGeometry, pointsData,
-  setSelectedFile
+  setSelectedFile,
+  minValue,  // Add this
+  maxValue   // Add this
 }: DoubleNavbarProps) {
   const [active, setActive] = useState(0);
 
@@ -76,6 +80,8 @@ export function DoubleNavbar({
             skewValue={skewValue}
             setSkewValue={setSkewValue}
             setSelectedFile={setSelectedFile}
+            minValue={minValue}  // Pass this
+            maxValue={maxValue}  // Pass this
           />
         );
       case 2: // Analytics

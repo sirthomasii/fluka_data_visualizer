@@ -1,7 +1,17 @@
 import React, { useMemo } from 'react';
 import { Text, Group, Stack } from '@mantine/core';
 import dynamic from 'next/dynamic';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { 
+  Chart as ChartJS, 
+  CategoryScale, 
+  LinearScale, 
+  PointElement, 
+  LineElement, 
+  Title, 
+  Tooltip, 
+  Legend,
+  ChartOptions
+} from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
 ChartJS.register(
@@ -58,37 +68,91 @@ export function AnalyticsPage({ pointsData }: AnalyticsPageProps) {
   }, [pointsData]);
 
   const chartData = useMemo(() => {
-    const sampleSize = Math.min(1000, pointsData.length);
-    const step = Math.floor(pointsData.length / sampleSize);
-    const sampledData = pointsData.filter((_, index) => index % step === 0);
+    const createRandomSample = (data: DataPoint[], axis: 'x' | 'y', sampleSize: number) => {
+      const shuffled = [...data].sort(() => 0.5 - Math.random());
+      const sample = shuffled.slice(0, sampleSize);
+      const lines: { x: number; y: number }[] = [];
+
+      sample.forEach(point => {
+        lines.push({ x: point[axis], y: 0 });
+        lines.push({ x: point[axis], y: point.value });
+        lines.push({ x: point[axis], y: NaN }); // NaN creates a break in the line
+      });
+
+      return lines;
+    };
+
+    const sampleSize = Math.min(100, pointsData.length);
 
     return {
-      xyData: {
-        labels: sampledData.map(d => d.x.toFixed(2)),
+      yyData: {
         datasets: [{
-          label: 'Value',
-          data: sampledData.map(d => d.value),
+          label: 'Y vs Value',
+          data: createRandomSample(pointsData, 'y', sampleSize),
+          borderColor: 'rgb(75, 192, 192)',
+          borderWidth: 0.5,
           fill: false,
-          backgroundColor: 'rgb(75, 192, 192)',
-          borderColor: 'rgba(75, 192, 192, 0.2)',
+          pointRadius: 0,
+          segment: {
+            borderColor: ctx => ctx.p0.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
+          }
         }],
       },
-      zData: {
-        labels: sampledData.map(d => d.z.toFixed(2)),
+      zzData: {
         datasets: [{
-          label: 'Value',
-          data: sampledData.map(d => d.value),
+          label: 'Z vs Value',
+          data: createRandomSample(pointsData, 'z', sampleSize),
+          borderColor: 'rgb(75, 192, 192)',
+          borderWidth: 0.5,
           fill: false,
-          backgroundColor: 'rgb(255, 99, 132)',
-          borderColor: 'rgba(255, 99, 132, 0.2)',
+          pointRadius: 0,
+          segment: {
+            borderColor: ctx => ctx.p0.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
+          }
         }],
       },
     };
   }, [pointsData]);
 
-  const chartOptions = {
+  const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    },
+    scales: {
+      x: {
+        type: 'linear',
+        position: 'bottom',
+        title: {
+          display: true,
+          text: 'Position'
+        },
+        ticks: {
+          maxRotation: 0,
+          autoSkip: true,
+          autoSkipPadding: 15
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Value'
+        },
+        position: 'left' as const,
+        beginAtZero: true
+      }
+    },
+    layout: {
+      padding: {
+        left: 0,
+        right: 0,
+        top: 10,
+        bottom: 0
+      }
+    }
   };
 
   if (analysisResults.numPoints === 0) {
@@ -100,20 +164,24 @@ export function AnalyticsPage({ pointsData }: AnalyticsPageProps) {
       <Group>
         <Text>Number of points: {analysisResults.numPoints}</Text>
         <Text>Highest value: {analysisResults.highestValue.toFixed(2)}</Text>
-        {/* <Text>Lowest value: {analysisResults.lowestValue.toFixed(2)}</Text> */}
         <Text>Average value: {analysisResults.avgValue.toFixed(2)}</Text>
       </Group>
 
-
-      <Text size="lg" weight={500}>X vs Value</Text>
-      <div style={{ height: '150px', width: '100%', maxWidth: '100%' }}>
-        <Chart data={chartData.xyData} options={chartOptions} />
+      <Text size="lg" weight={500}>Y vs Value (Random Sample)</Text>
+      <div style={{ height: '200px', width: '100%', maxWidth: '100%', position: 'relative' }}>
+        <Chart type="line" data={chartData.yyData} options={chartOptions} />
       </div>
 
-      <Text size="lg" weight={500}>Z vs Value</Text>
-      <div style={{ height: '150px', width: '100%', maxWidth: '100%' }}>
-        <Chart data={chartData.zData} options={chartOptions} />
+      <Text size="lg" weight={500}>Z vs Value (Random Sample)</Text>
+      <div style={{ height: '200px', width: '100%', maxWidth: '100%', position: 'relative' }}>
+        <Chart type="line" data={chartData.zzData} options={chartOptions} />
       </div>
+
+      <style jsx global>{`
+        canvas {
+          left: 0 !important;
+        }
+      `}</style>
     </Stack>
   );
 }
