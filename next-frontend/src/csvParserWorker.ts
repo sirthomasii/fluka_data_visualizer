@@ -3,12 +3,12 @@ import Papa from 'papaparse';
 self.addEventListener('message', (event) => {
   const { csvString } = event.data;
   
-  let points: any[] = [];
+  const points: { x: number; y: number; z: number; value: number }[] = [];
   let minValue = Infinity;
   let maxValue = -Infinity;
 
   Papa.parse(csvString, {
-    step: (results) => {
+    step: (results: Papa.ParseResult<string[]>) => {
       const [x, y, z, value] = results.data.map(Number);
       if (!isNaN(x) && isFinite(x) &&
           !isNaN(y) && isFinite(y) &&

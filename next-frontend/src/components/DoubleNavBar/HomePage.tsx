@@ -1,16 +1,10 @@
 import React from 'react';
-import { Button, Group } from '@mantine/core';
 
-interface HomePageProps {
-  setGeometry: (geometry: string) => void;
-}
-
-export function HomePage({ setGeometry }: HomePageProps) {
+export function HomePage() {
   return (
-    <Group>
-      <Button onClick={() => setGeometry('cube')}>Cube</Button>
-      <Button onClick={() => setGeometry('sphere')}>Sphere</Button>
-      <Button onClick={() => setGeometry('cylinder')}>Cylinder</Button>
-    </Group>
+    <div>
+      <h2>Welcome to the Home Page</h2>
+      <p>This is the main landing page for your application.</p>
+    </div>
   );
 }

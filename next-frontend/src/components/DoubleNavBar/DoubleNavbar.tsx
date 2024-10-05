@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { UnstyledButton, Tooltip, Title, rem, Button, Group } from '@mantine/core';
+import { UnstyledButton, Tooltip, Title, rem } from '@mantine/core';
 import {
   IconHome2,
   IconGauge,
@@ -12,7 +12,7 @@ import {
   IconSettings,
 } from '@tabler/icons-react';
 import classes from './DoubleNavbar.module.css';
-import { HomePage } from './HomePage';
+// import { HomePage } from './HomePage';
 import { DashboardPage } from './DashboardPage';
 import { AnalyticsPage } from './AnalyticsPage';
 
@@ -21,12 +21,11 @@ interface DoubleNavbarProps {
   setThresholdValue: (value: number) => void;
   skewValue: number;
   setSkewValue: (value: number) => void;
-  setGeometry: (geometry: string) => void;
   pointsData: { x: number; y: number; z: number; value: number }[];
   setSelectedFile: (file: string) => void;
-  minValue: number;  // Add this
-  maxValue: number;  // Add this
-  hideHalfPoints: boolean;  // Add this
+  minValue: number;
+  maxValue: number;
+  hideHalfPoints: boolean;
   setHideHalfPoints: (hide: boolean) => void;
 }
 
@@ -43,11 +42,11 @@ const mainLinksMockdata = [
 export function DoubleNavbar({ 
   thresholdValue, setThresholdValue, 
   skewValue, setSkewValue, 
-  setGeometry, pointsData,
+  pointsData,
   setSelectedFile,
-  minValue,  // Add this
-  maxValue,  // Add this
-  hideHalfPoints,  // Add this
+  minValue,
+  maxValue,
+  hideHalfPoints,
   setHideHalfPoints
 }: DoubleNavbarProps) {
   const [active, setActive] = useState(0);
@@ -76,9 +75,7 @@ export function DoubleNavbar({
   const renderContent = () => {
     switch (active) {
       case 0: // Home
-        return (
-          <HomePage setGeometry={setGeometry} />
-        );
+        return <div>Home Page Content</div>;
       case 1: // Dashboard
         return (
           <DashboardPage
@@ -87,15 +84,15 @@ export function DoubleNavbar({
             skewValue={skewValue}
             setSkewValue={setSkewValue}
             setSelectedFile={setSelectedFile}
-            minValue={minValue}  // Pass this
-            maxValue={maxValue}  // Pass this
+            minValue={minValue}
+            maxValue={maxValue}
             beamEnergy={beamEnergy}
             setBeamEnergy={setBeamEnergy}
             beamSize={beamSize}
             setBeamSize={setBeamSize}
             material={material}
             setMaterial={setMaterial}
-            hideHalfPoints={hideHalfPoints}  // Add this
+            hideHalfPoints={hideHalfPoints}
             setHideHalfPoints={setHideHalfPoints}
           />
         );

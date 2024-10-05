@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Container, Flex, Box, useMantineTheme } from '@mantine/core';
+import { Container, Flex, Box } from '@mantine/core';
 import { DoubleNavbar } from './DoubleNavBar/DoubleNavbar';
 import PointCloudScene from './PointCloudScene/PointCloudScene';
 import Papa from 'papaparse';
@@ -16,10 +16,8 @@ interface DataPoint {
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const theme = useMantineTheme();
   const [thresholdValue, setThresholdValue] = useState(0);
   const [skewValue, setSkewValue] = useState(0.5);
-  const [geometry, setGeometry] = useState('cube');
   const [pointsData, setPointsData] = useState<DataPoint[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [minValue, setMinValue] = useState(0);
@@ -34,67 +32,53 @@ export function MainLayout({ children }: MainLayoutProps) {
     setSkewValue(value);
   }, []);
 
-  const handleGeometryChange = useCallback((newGeometry: string) => {
-    setGeometry(newGeometry);
-  }, []);
-
-  const handleSelectedFileChange = useCallback((file: string) => {
-    setSelectedFile(file);
-  }, []);
-
   useEffect(() => {
     if (selectedFile) {
+      console.log('Fetching file:', selectedFile);
       fetch(`/fluka_data/${selectedFile}`)
         .then(response => response.text())
         .then(csvData => {
-          let parsedData: DataPoint[] = [];
-          let minVal = Infinity;
-          let maxVal = -Infinity;
-
-          Papa.parse(csvData, {
-            step: (results) => {
-              if (results.data.length === 4) {
-                const point: DataPoint = {
-                  x: parseFloat(results.data[0] as string),
-                  y: parseFloat(results.data[1] as string),
-                  z: parseFloat(results.data[2] as string),
-                  value: parseFloat(results.data[3] as string)
-                };
-                
-                if (!isNaN(point.x) && !isNaN(point.y) && !isNaN(point.z) && !isNaN(point.value)) {
-                  parsedData.push(point);
-                  minVal = Math.min(minVal, point.value);
-                  maxVal = Math.max(maxVal, point.value);
-                }
-              }
-            },
-            complete: () => {
-              setPointsData(parsedData);
-              setMinValue(minVal);
-              setMaxValue(maxVal);
-              // Set threshold to minVal instead of 0
-              setThresholdValue(minVal);
-              console.log(`Loaded ${parsedData.length} points. Min: ${minVal}, Max: ${maxVal}`);
-            },
-            error: (error) => {
-              console.error('Error parsing CSV:', error);
-            }
+          console.log('CSV data received, length:', csvData.length);
+          const parseResult = Papa.parse<DataPoint>(csvData, {
+            header: true,
+            dynamicTyping: true,
+            transformHeader: (header: string) => header.toLowerCase(),
           });
+
+          console.log('Parse result:', parseResult);
+
+          const validData = parseResult.data.filter((point): point is DataPoint => 
+            typeof point.x === 'number' &&
+            typeof point.y === 'number' &&
+            typeof point.z === 'number' &&
+            typeof point.value === 'number'
+          );
+
+          console.log('Valid data points:', validData.length);
+
+          if (validData.length > 0) {
+            const values = validData.map(point => point.value);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+
+            setPointsData(validData);
+            setMinValue(min);
+            setMaxValue(max);
+            setThresholdValue(min);
+            console.log(`Loaded ${validData.length} points. Min: ${min}, Max: ${max}`);
+          } else {
+            console.error('No valid data points found');
+          }
         })
-        .catch(error => console.error('Error loading file:', error));
+        .catch(error => {
+          console.error('Error loading file:', error);
+          console.error('Error stack:', error.stack);
+        });
     }
   }, [selectedFile]);
 
   return (
-    <Container 
-      size="xl" 
-      p={0} 
-      style={{ 
-        height: '100vh', 
-        boxShadow: '0 0 20px 0 rgba(0, 0, 0, 1)',
-        backgroundColor: theme.colors.dark[7],
-      }}
-    >
+    <Container size="xl" style={{ height: '100vh', padding: 0 }}>
       <Flex style={{ height: '100%' }}>
         <Box w={300} style={{ flexShrink: 0 }}>
           <DoubleNavbar
@@ -102,25 +86,23 @@ export function MainLayout({ children }: MainLayoutProps) {
             setThresholdValue={handleThresholdChange}
             skewValue={skewValue}
             setSkewValue={handleSkewChange}
-            setGeometry={handleGeometryChange}
             pointsData={pointsData}
-            setSelectedFile={handleSelectedFileChange}
+            setSelectedFile={setSelectedFile}
             minValue={minValue}
             maxValue={maxValue}
             setHideHalfPoints={setHideHalfPoints}
             hideHalfPoints={hideHalfPoints}
           />
         </Box>
-        <Box style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', paddingTop: '0' }}>
+        <Box style={{ flex: 1, position: 'relative', height: '100%' }}>
+          {pointsData.length > 0 && (
             <PointCloudScene
               thresholdValue={thresholdValue}
               skewValue={skewValue}
-              geometry={geometry}
               pointsData={pointsData}
               hideHalfPoints={hideHalfPoints}
             />
-          </div>
+          )}
           {children}
         </Box>
       </Flex>

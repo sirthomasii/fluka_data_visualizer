@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Title, Slider, Stack, Select, Text, Button } from '@mantine/core';
-import classes from './DoubleNavbar.module.css';
+import { Slider, Stack, Select, Text, Button } from '@mantine/core';
 
 interface DashboardPageProps {
   thresholdValue: number;
@@ -87,7 +86,7 @@ export function DashboardPage({
 
   return (
     <div>
-      <Stack spacing="md" style={{ maxWidth: 400, margin: '20px 0' }}>
+      <Stack gap="md" style={{ maxWidth: 400, margin: '20px 0' }}>
         {flukaParams && (
           <>
             <Select

@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { Text, Group, Stack } from '@mantine/core';
-import dynamic from 'next/dynamic';
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -12,8 +11,13 @@ import {
   Legend,
   ChartOptions
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import { ScriptableContext } from 'chart.js';
+import dynamic from 'next/dynamic';
+
+const Line = dynamic(() => import('react-chartjs-2').then((mod) => mod.Line), {
+  ssr: false,
+});
+
+import { ScriptableLineSegmentContext } from 'chart.js';
 
 ChartJS.register(
   CategoryScale,
@@ -24,10 +28,6 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-
-const Chart = dynamic(() => import('react-chartjs-2').then((mod) => mod.Line), {
-  ssr: false,
-});
 
 interface DataPoint {
   x: number;
@@ -69,7 +69,7 @@ export function AnalyticsPage({ pointsData }: AnalyticsPageProps) {
   }, [pointsData]);
 
   const chartData = useMemo(() => {
-    const createRandomSample = (data: DataPoint[], axis: 'x' | 'y', sampleSize: number) => {
+    const createRandomSample = (data: DataPoint[], axis: 'x' | 'y' | 'z', sampleSize: number) => {
       const shuffled = [...data].sort(() => 0.5 - Math.random());
       const sample = shuffled.slice(0, sampleSize);
       const lines: { x: number; y: number }[] = [];
@@ -95,8 +95,8 @@ export function AnalyticsPage({ pointsData }: AnalyticsPageProps) {
           fill: false,
           pointRadius: 0,
           segment: {
-            borderColor: (ctx: ScriptableContext<'line'>) => 
-              ctx.p0.parsed.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
+            borderColor: (ctx: ScriptableLineSegmentContext) => 
+              ctx.p1.parsed.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
           }
         }],
       },
@@ -109,8 +109,8 @@ export function AnalyticsPage({ pointsData }: AnalyticsPageProps) {
           fill: false,
           pointRadius: 0,
           segment: {
-            borderColor: (ctx: ScriptableContext<'line'>) => 
-              ctx.p0.parsed.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
+            borderColor: (ctx: ScriptableLineSegmentContext) => 
+              ctx.p1.parsed.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
           }
         }],
       },
@@ -163,21 +163,21 @@ export function AnalyticsPage({ pointsData }: AnalyticsPageProps) {
   }
 
   return (
-    <Stack spacing="md" style={{ width: '100%', maxWidth: '100%' }}>
+    <Stack gap="md" style={{ width: '100%', maxWidth: '100%' }}>
       <Group>
         <Text>Number of points: {analysisResults.numPoints}</Text>
         <Text>Highest value: {analysisResults.highestValue.toFixed(2)}</Text>
         <Text>Average value: {analysisResults.avgValue.toFixed(2)}</Text>
       </Group>
 
-      <Text size="lg" weight={500}>Y vs Value (Random Sample)</Text>
+      <Text size="lg" fw={500}>Y vs Value (Random Sample)</Text>
       <div style={{ height: '200px', width: '100%', maxWidth: '100%', position: 'relative' }}>
-        <Chart type="line" data={chartData.yyData} options={chartOptions} />
+        <Line data={chartData.yyData} options={chartOptions} />
       </div>
 
-      <Text size="lg" weight={500}>Z vs Value (Random Sample)</Text>
+      <Text size="lg" fw={500}>Z vs Value (Random Sample)</Text>
       <div style={{ height: '200px', width: '100%', maxWidth: '100%', position: 'relative' }}>
-        <Chart type="line" data={chartData.zzData} options={chartOptions} />
+        <Line data={chartData.zzData} options={chartOptions} />
       </div>
 
       <style jsx global>{`
