@@ -171,12 +171,12 @@ export function AnalyticsPage({ pointsData }: AnalyticsPageProps) {
       </Group>
 
       <Text size="lg" fw={500}>Y vs Value (Random Sample)</Text>
-      <div style={{ height: '200px', width: '100%', maxWidth: '100%', position: 'relative' }}>
+      <div style={{ height: '150px', width: '100%', maxWidth: '100%', position: 'relative' }}>
         <Line data={chartData.yyData} options={chartOptions} />
       </div>
 
       <Text size="lg" fw={500}>Z vs Value (Random Sample)</Text>
-      <div style={{ height: '200px', width: '100%', maxWidth: '100%', position: 'relative' }}>
+      <div style={{ height: '150px', width: '100%', maxWidth: '100%', position: 'relative' }}>
         <Line data={chartData.zzData} options={chartOptions} />
       </div>
 
