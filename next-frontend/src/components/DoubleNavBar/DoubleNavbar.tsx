@@ -6,10 +6,10 @@ import {
   IconHome2,
   IconGauge,
   IconDeviceDesktopAnalytics,
-  IconFingerprint,
-  IconCalendarStats,
-  IconUser,
-  IconSettings,
+  // IconFingerprint,
+  // IconCalendarStats,
+  // IconUser,
+  // IconSettings,
 } from '@tabler/icons-react';
 import classes from './DoubleNavbar.module.css';
 // import { HomePage } from './HomePage';
