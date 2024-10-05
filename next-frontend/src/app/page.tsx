@@ -4,9 +4,12 @@ import { useEffect, useState } from 'react';
 import { Container, Flex, Box } from '@mantine/core';
 import { MainLayout } from '../components/MainLayout';
 
+// Define a type for your error state
+type ErrorType = Error | null;
+
 export default function HomePage() {
   const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<ErrorType>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,7 +23,8 @@ export default function HomePage() {
         setData(result);
       } catch (error) {
         console.error('Fetch error:', error);
-        setError(error);
+        // Cast the error to ErrorType
+        setError(error as ErrorType);
       }
     };
 
