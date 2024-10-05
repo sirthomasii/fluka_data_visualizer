@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { UnstyledButton, Tooltip, Title, rem } from '@mantine/core';
+import { UnstyledButton, Tooltip, rem } from '@mantine/core';
 import {
   IconHome2,
   IconGauge,
@@ -87,7 +87,7 @@ export function DoubleNavbar({
         className={classes.mainLink}
         data-active={index === active || undefined}
       >
-        <link.icon style={{ width: rem(22), height: rem(22) }} stroke={1.5} />
+        <link.icon style={{ width: rem(30), height: rem(30) }} stroke={1.5} />
       </UnstyledButton>
     </Tooltip>
   ));
@@ -147,9 +147,7 @@ export function DoubleNavbar({
           {mainLinks}
         </div>
         <div className={classes.main}>
-          <Title order={4} className={classes.title}>
-            {mainLinksMockdata[active].label}
-          </Title>
+          {/* Remove the Title component */}
           {renderContent()}
         </div>
       </div>

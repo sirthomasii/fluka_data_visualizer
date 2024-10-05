@@ -9,7 +9,7 @@ interface HomePageProps {
 export function HomePage({ setSimulationType }: HomePageProps) {
   return (
     <div>
-      <h3>ytor physics simulator</h3>
+      <h2>Select simulation</h2>
       <Group mt="xl">
         <Button 
           leftSection={<IconMeteor size="1rem" />} 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
@@ -34,6 +34,8 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
   const gridRef = useRef<THREE.GridHelper | null>(null);
 
   const previousSimulationTypeRef = useRef(simulationType);
+
+  const [frame, setFrame] = useState(0);
 
   const initScene = useCallback(() => {
     console.log('initScene called');
@@ -110,19 +112,25 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     }
   }, []);
 
-  const generateMandelbulb = useCallback((thresholdCutoff = 0.5) => {
-    const resolution = 100;
+  const generateMandelbulb = useCallback((thresholdCutoff = 0.25) => {
+    const resolution = 50;
     const size = 2.5;
     const points: THREE.Vector3[] = [];
     const colors: THREE.Color[] = [];
 
-    const mandel = (x: number, y: number, z: number, imax: number): number => {
-      const x0 = x, y0 = y, z0 = z;
-      const n = 8;
+    // Calculate sinusoidal coefficients
+    const A = Math.cos(frame * .015) * 10 + 1; // Oscillates between 0.5 and 1.5
+    const B = Math.sin(frame * .015) * 10 + 1; // Oscillates between 0.5 and 1.5
+    const C = Math.cos(frame * .015) * 10 + 1; // Oscillates between 0.5 and 1.5
+    const max = Math.sin(frame * .015) * 20 + 10; // Oscillates between 0.5 and 1.5
 
-      for (let i = 0; i < imax; i++) {
-        if (Math.abs(x - x0) + Math.abs(y - y0) + Math.abs(z - z0) > n) {
-          return i / imax;
+    const mandel = (x: number, y: number, z: number): number => {
+      const x0 = x, y0 = y, z0 = z;
+      const n = 5;
+
+      for (let i = 0; i < max; i++) {
+        if (A*Math.abs(x - x0) + B*Math.abs(y - y0) + C*Math.abs(z - z0) > n) {
+          return i / max;
         }
 
         const r = Math.sqrt(x*x + y*y + z*z);
@@ -144,7 +152,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
           const y = (j / resolution - 0.5) * size;
           const z = (k / resolution - 0.5) * size;
 
-          const value = mandel(x, y, z, 10);
+          const value = mandel(x, y, z);
           if (value > thresholdCutoff) {
             points.push(new THREE.Vector3(x, y, z));
             colors.push(new THREE.Color().setHSL(value, 1, 0.5));
@@ -154,7 +162,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     }
 
     return { points, colors };
-  }, []);
+  }, [frame]);
 
   const generateStrangeAttractor = useCallback(() => {
     const points: THREE.Vector3[] = [];
@@ -296,7 +304,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
       pointsData.forEach((point) => {
         if (point.value >= thresholdValue) {
           // Only add points if not hiding half or if the point is in the visible half
-          if (!hideHalfPoints || (point.y <= 0 && point.z <= 0)) {
+          if (!hideHalfPoints || (point.x <= 0)) {
             const i = validPointCount * 3;
             const position = new THREE.Vector3(point.x, point.y, point.z);
             randomlyDisplacePoint(position);
@@ -331,19 +339,19 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
       positions = new Float32Array(points.length * 3);
       colors = new Float32Array(points.length * 3);
 
-      points.forEach((point) => {
-        randomlyDisplacePoint(point);
-        const i = validPointCount * 3;
-        positions[i] = point.x;
-        positions[i + 1] = point.y;
-        positions[i + 2] = point.z;
+      // Use fractalColors to populate the colors array
+      for (let i = 0; i < points.length; i++) {
+        const point = points[i];
+        const color = fractalColors[i];
 
-        colors[i] = fractalColors[validPointCount].r;
-        colors[i + 1] = fractalColors[validPointCount].g;
-        colors[i + 2] = fractalColors[validPointCount].b;
+        positions[i * 3] = point.x;
+        positions[i * 3 + 1] = point.y;
+        positions[i * 3 + 2] = point.z;
 
-        validPointCount++;
-      });
+        colors[i * 3] = color.r;
+        colors[i * 3 + 1] = color.g;
+        colors[i * 3 + 2] = color.b;
+      }
     } else {
       console.error('Invalid simulation type');
       return;
@@ -364,18 +372,22 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     pointCloudRef.current = pointCloud;
 
     // Only fit camera if it's the first render or if simulation type has changed
-    if (!previousSimulationTypeRef.current || previousSimulationTypeRef.current !== simulationType) {
+    if (previousSimulationTypeRef.current !== simulationType) {
       fitCameraToGeometry(geometry);
       previousSimulationTypeRef.current = simulationType;
     }
 
+    if (simulationType === 'fractal' && fractalType === 'mandelbulb') {
+      setFrame(prevFrame => prevFrame + 1); // Increment frame counter
+    }
+
     console.log(`Max value: ${maxValue}, Valid points: ${validPointCount}`);
-  }, [pointsData, thresholdValue, skewValue, clearScene, simulationType, fractalType, generateMandelbulb, generateStrangeAttractor, pointSize, fitCameraToGeometry]);
+  }, [pointsData, thresholdValue, skewValue, clearScene, simulationType, fractalType, generateMandelbulb, generateStrangeAttractor, pointSize, hideHalfPoints]);
 
   useEffect(() => {
     console.log('PointCloudScene useEffect triggered');
     updatePointCloud();
-  }, [updatePointCloud]);
+  }, [updatePointCloud, hideHalfPoints]);
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 });

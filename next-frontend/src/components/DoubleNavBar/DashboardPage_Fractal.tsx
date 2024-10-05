@@ -9,7 +9,7 @@ interface DashboardPage_FractalProps {
 export function DashboardPage_Fractal({ fractalType, setFractalType }: DashboardPage_FractalProps) {
   return (
     <div>
-      {/* <h3>Fractal Simulation Dashboard</h3> */}
+      <h3>Fractal params</h3>
       <Select
         label="Select Fractal Type"
         placeholder="Choose a fractal"

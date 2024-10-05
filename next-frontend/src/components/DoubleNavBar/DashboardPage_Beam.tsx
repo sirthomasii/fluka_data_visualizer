@@ -96,6 +96,8 @@ export function DashboardPage_Beam({
 
   return (
     <div>
+      <h3>Proton beam params</h3>
+
       <Stack gap="md" style={{ maxWidth: 400, margin: '20px 0' }}>
         {flukaParams && (
           <>
