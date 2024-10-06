@@ -88,7 +88,7 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
     return {
       yyData: {
         datasets: [{
-          label: 'Y vs Energy',  // Change this label
+          label: 'Y vs Var',  // Change this label
           data: createRandomSample(pointsData, 'y', sampleSize),
           borderColor: 'rgb(75, 192, 192)',
           borderWidth: 0.5,
@@ -102,15 +102,15 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
       },
       zzData: {
         datasets: [{
-          label: 'Z vs Energy',  // Change this label
-          data: createRandomSample(pointsData, 'z', sampleSize),
+          label: 'X vs Var',  // Change this label
+          data: createRandomSample(pointsData, 'x', sampleSize),
           borderColor: 'rgb(75, 192, 192)',
           borderWidth: 0.5,
           fill: false,
           pointRadius: 0,
           segment: {
             borderColor: (ctx: ScriptableLineSegmentContext) => 
-              ctx.p1.parsed.y > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(0,0,0,0)',
+              ctx.p1.parsed.y > 0 ? 'rgba(192, 72, 192, 0.5)' : 'rgba(0,0,0,0)',
           }
         }],
       },
@@ -133,6 +133,9 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
           display: true,
           text: 'Position'
         },
+        min: -1.0, // Adjust this value based on your data range
+        max: 1.0, // Adjust this value based on your data range
+
         ticks: {
           maxRotation: 0,
           autoSkip: true,
@@ -143,7 +146,7 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
         type: 'linear',
         title: {
           display: true,
-          text: 'Energy'
+          text: ''
         },
         position: 'left' as const,
         min: 0.1, // Adjust this value based on your data range
@@ -155,12 +158,7 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
       }
     },
     layout: {
-      padding: {
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: 10
-      }
+      padding: 0
     }
   };
 
@@ -169,22 +167,22 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
   }
 
   return (
-    <Stack gap="md" style={{ width: '100%', maxWidth: '100%' }}>
+    <Stack gap="xs" style={{ width: '100%', height: '100%', overflow: 'auto' }}>
       <h3>Beam Simulation Analytics</h3>
 
       <Group>
-        <Text>Number of points: {analysisResults.numPoints}</Text>
-        <Text>Highest value: {analysisResults.highestValue.toFixed(2)}</Text>
-        <Text>Average value: {analysisResults.avgValue.toFixed(2)}</Text>
+        <Text size="xs">Points: {analysisResults.numPoints}</Text>
+        <Text size="xs">Highest: {analysisResults.highestValue.toExponential(2)}</Text>
+        <Text size="xs">Average: {analysisResults.avgValue.toExponential(2)}</Text>
       </Group>
 
-      <Text size="lg" fw={500}>Y vs Energy</Text>
-      <div style={{ height: '300px', width: '100%', maxWidth: '100%' }}>
+      <Text size="sm" fw={500}>Y Binning </Text>
+      <div style={{ height: '200px', width: '250px', position: 'relative' }}>
         <Line data={chartData.yyData} options={chartOptions} />
       </div>
 
-      <Text size="lg" fw={500}>Z vs Energy</Text>
-      <div style={{ height: '300px', width: '100%', maxWidth: '100%' }}>
+      <Text size="sm" fw={500}>X Binning </Text>
+      <div style={{ height: '200px', width: '250px', position: 'relative' }}>
         <Line data={chartData.zzData} options={chartOptions} />
       </div>
     </Stack>

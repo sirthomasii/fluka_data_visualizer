@@ -131,21 +131,21 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     };
   }, [initScene]);
 
-  const generateMandelbulb = useCallback((thresholdCutoff = 0.2) => {
+  const generateMandelbulb = useCallback((thresholdCutoff = 0.5) => {
     const resolution = 60;
-    const size = 2.5;
+    const size = 3;
     const points: THREE.Vector3[] = [];
     const colors: THREE.Color[] = [];
 
     // Calculate sinusoidal coefficients
-    const A = Math.abs(Math.sin(frame * .017) * 10) + 1; // Oscillates between 0.5 and 1.5
-    const B = Math.abs(Math.sin(frame * .013) * 10) + 1; // Oscillates between 0.5 and 1.5
-    const C = Math.abs(Math.sin(frame * .018) * 10) + 1; // Oscillates between 0.5 and 1.5
-    const max = Math.abs(Math.sin(frame * .012) * 10) + 5; // Oscillates between 0.5 and 1.5
+    const A = Math.abs(Math.cos(frame * .017) * 10) + 3; // Oscillates between 0.5 and 1.5
+    const B = Math.abs(Math.sin(frame * .013) * 10) + 3; // Oscillates between 0.5 and 1.5
+    const C = Math.abs(Math.sin(frame * .018) * 10) + 3; // Oscillates between 0.5 and 1.5
+    const n = Math.abs(Math.sin(frame * .012) * 10) + 5; // Oscillates between 0.5 and 1.5
 
     const mandel = (x: number, y: number, z: number): number => {
       const x0 = x, y0 = y, z0 = z;
-      const n = 5;
+      const max = 3;
 
       for (let i = 0; i < max; i++) {
         if (A*Math.abs(x - x0) + B*Math.abs(y - y0) + C*Math.abs(z - z0) > n) {
@@ -167,10 +167,14 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     for (let i = 0; i < resolution; i++) {
       for (let j = 0; j < resolution; j++) {
         for (let k = 0; k < resolution; k++) {
-          const randomOffset = 0.005;
-          const x = (i / resolution - 0.5) * size + (Math.random() - 0.5) * randomOffset;
-          const y = (j / resolution - 0.5) * size + (Math.random() - 0.5) * randomOffset;
-          const z = (k / resolution - 0.5) * size + (Math.random() - 0.5) * randomOffset;
+          // const randomOffset = 0.005;
+          // const x = (i / resolution - 0.5) * size + (Math.random() - 0.5) * randomOffset;
+          // const y = (j / resolution - 0.5) * size + (Math.random() - 0.5) * randomOffset;
+          // const z = (k / resolution - 0.5) * size + (Math.random() - 0.5) * randomOffset;
+
+          const x = (i / resolution - 0.5) * size;
+          const y = (j / resolution - 0.5) * size;
+          const z = (k / resolution - 0.5) * size;
 
           // Only add points if not hiding half or if the point is in the visible half
           if (!hideHalfPoints || (x <= 0)) {
@@ -360,7 +364,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
 
       if (fractalType === 'mandelbulb') {
         ({ points, colors: fractalColors } = generateMandelbulb());
-        currentPointSize = pointSize * 1.25; // Increase point size for mandelbulb
+        currentPointSize = pointSize * 1; // Increase point size for mandelbulb
       } else if (fractalType === 'strangeAttractor') {
         ({ points, colors: fractalColors } = generateStrangeAttractor());
       } else {
