@@ -4,21 +4,34 @@ import { IconMeteor, IconMathFunction, IconAtom } from '@tabler/icons-react';
 
 interface HomePageProps {
   setSimulationType: (type: 'beam' | 'fractal') => void;
+  setShowGrid: (show: boolean) => void;
+  setShowBoundingBox: (show: boolean) => void;
 }
 
-export function HomePage({ setSimulationType }: HomePageProps) {
+export function HomePage({ setSimulationType, setShowGrid, setShowBoundingBox }: HomePageProps) {
+  const handleSimulationTypeChange = (type: 'beam' | 'fractal') => {
+    setSimulationType(type);
+    if (type === 'fractal') {
+      setShowBoundingBox(true);
+    } else {
+      // For beam simulation, we'll set them back to true
+      setShowGrid(true);
+      setShowBoundingBox(true);
+    }
+  };
+
   return (
-    <div>
+    <Flex direction="column" align="center" style={{ height: '100%' }}>
       <Flex align="center" gap="sm">
         <IconAtom size="2rem" />
-        <Text size="xl" fw={700}>Select simulation</Text>
+        <Text size="xl" fw={200}>SELECT SIMULATION</Text>
       </Flex>
-      <Group mt="xl">
+      <Group mt="xl" pl="xs">
         <Button 
           leftSection={<IconMeteor size="1rem" />} 
           variant="filled"
           color="purple"
-          onClick={() => setSimulationType('beam')}
+          onClick={() => handleSimulationTypeChange('beam')}
         >
           Proton Beam
         </Button>
@@ -26,11 +39,11 @@ export function HomePage({ setSimulationType }: HomePageProps) {
           leftSection={<IconMathFunction size="1rem" />} 
           variant="filled"
           color="purple"
-          onClick={() => setSimulationType('fractal')}
+          onClick={() => handleSimulationTypeChange('fractal')}
         >
           Fractals
         </Button>
       </Group>
-    </div>
+    </Flex>
   );
 }

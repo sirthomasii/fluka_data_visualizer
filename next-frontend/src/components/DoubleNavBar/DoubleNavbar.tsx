@@ -117,10 +117,14 @@ export function DoubleNavbar({
   const renderContent = () => {
     switch (active) {
       case 0: // Home
-        return <HomePage setSimulationType={(type) => {
-          setSimulationType(type);
-          setActive(1); // Move to Dashboard when a simulation type is selected
-        }} />;
+        return <HomePage 
+          setSimulationType={(type) => {
+            setSimulationType(type);
+            setActive(1); // Move to Dashboard when a simulation type is selected
+          }}
+          setShowGrid={setShowGrid}
+          setShowBoundingBox={setShowBoundingBox}
+        />;
       case 1: // Dashboard
         return simulationType === 'beam' ? (
           <DashboardPage_Beam
@@ -148,10 +152,10 @@ export function DoubleNavbar({
           <DashboardPage_Fractal
             fractalType={fractalType}
             setFractalType={setFractalType}
-            hideHalfPoints={hideHalfPoints}
-            setHideHalfPoints={setHideHalfPoints}
             fractalParams={fractalParams}
-            setFractalParams={setFractalParams}  // Use the prop directly
+            setFractalParams={setFractalParams}
+            showBoundingBox={showBoundingBox}
+            setShowBoundingBox={setShowBoundingBox}
           />
         );
       case 2: // Analytics

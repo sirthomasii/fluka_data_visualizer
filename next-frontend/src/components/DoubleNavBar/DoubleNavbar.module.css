@@ -1,5 +1,5 @@
 .navbar {
-  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+  /* background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6)); */
   height: rem(750px);
   width: rem(300px);
   display: flex;
@@ -14,7 +14,7 @@
 
 .aside {
   flex: 0 0 rem(60px);
-  background-color: var(--mantine-color-body);
+  /* background-color: var(--mantine-color-body); */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -23,7 +23,7 @@
 
 .main {
   flex: 1;
-  background-color: var(--mantine-color-body);
+  /* background-color: var(--mantine-color-body); */
   padding: var(--mantine-spacing-md);
   display: flex;
   flex-direction: column;
@@ -57,7 +57,7 @@
     var(--mantine-font-family);
   margin-bottom: var(--mantine-spacing-sm);
   line-height: 1;
-  background-color: var(--mantine-color-body);
+  /* background-color: var(--mantine-color-body); */
   padding: var(--mantine-spacing-md);
   padding-top: rem(18px);
   height: rem(60px);

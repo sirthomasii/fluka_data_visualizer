@@ -63,6 +63,10 @@ export function MainLayout({ children }: MainLayoutProps) {
     setSimulationType(type);
     if (type === 'fractal') {
       setFractalType('mandelbulb');
+      setShowBoundingBox(true);
+    } else {
+      setShowGrid(true);
+      setShowBoundingBox(true);
     }
   }, []);
 
@@ -163,12 +167,16 @@ export function MainLayout({ children }: MainLayoutProps) {
       style={{ 
         height: '100vh', 
         padding: 0,
-        boxShadow: '0 4px 10px 0 rgba(0, 0, 0, 0.8), 0 6px 20px 0 rgba(0, 0, 0, 0.8)'
+        boxShadow: '0 4px 15px 0 rgba(0, 0, 0, 0.8), 0 6px 20px 0 rgba(0, 0, 0, 0.8)',
+        backgroundColor: '#2424248c' // Add this line
+
       }}
     >
       <Flex style={{ height: '100%' }}>
-        <Box w={300} style={{ flexShrink: 0 }}>
+        <Box w={300} style={{ flexShrink: 0,borderRight: '1px solid black'}}>
+
           <DoubleNavbar
+          
             thresholdValue={thresholdValue}
             setThresholdValue={handleThresholdChange}
             skewValue={skewValue}

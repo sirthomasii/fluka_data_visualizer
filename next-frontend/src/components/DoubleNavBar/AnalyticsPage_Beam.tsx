@@ -168,7 +168,7 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
 
   return (
     <Stack gap="xs" style={{ width: '100%', height: '100%', overflow: 'auto' }}>
-      <h3>Beam Simulation Analytics</h3>
+        <Text size="xl" fw={200}>BEAM ANALYTICS</Text>
 
       <Group>
         <Text size="xs">Points: {analysisResults.numPoints}</Text>

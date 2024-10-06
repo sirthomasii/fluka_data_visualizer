@@ -46,32 +46,82 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
   const [shouldFitCamera, setShouldFitCamera] = useState(true);
   const [isNewSimulation, setIsNewSimulation] = useState(true);
   const [isGeometryLoaded, setIsGeometryLoaded] = useState(false);
-  const [boxVisibility, setBoxVisibility] = useState(showBoundingBox);
+  const isMountedRef = useRef(true);
 
-  // Update box visibility when prop changes
-  useEffect(() => {
-    setBoxVisibility(showBoundingBox);
-  }, [showBoundingBox]);
+  // Instead, if you need to keep track of these values, use refs
+  const boundingBoxRef = useRef<THREE.Box3Helper | null>(null);
+  // pointCloudRef is already defined earlier in your component
 
-  // Separate effect for managing the bounding box
   useEffect(() => {
-    if (boxRef.current) {
-      boxRef.current.visible = simulationType === 'beam' && boxVisibility;
-      console.log('Box visibility updated:', boxRef.current.visible);
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // New function to update grid visibility
+  const updateGridVisibility = useCallback(() => {
+    if (gridRef.current) {
+      gridRef.current.visible = showGrid && simulationType === 'beam';
+      console.log('Grid visibility set to:', gridRef.current.visible);
     }
-  }, [boxVisibility, simulationType]);
+  }, [showGrid, simulationType]);
+
+  // New function to update bounding box visibility
+  const updateBoundingBoxVisibility = useCallback(() => {
+    if (boxRef.current) {
+      boxRef.current.visible = showBoundingBox;
+      console.log('Box visibility set to:', boxRef.current.visible);
+    }
+  }, [showBoundingBox, simulationType]);
+
+  // Effect to initialize the scene once
+  useEffect(() => {
+    initScene();
+    return () => {
+      // Cleanup function
+      if (rendererRef.current && containerRef.current) {
+        containerRef.current.removeChild(rendererRef.current.domElement);
+      }
+      if (sceneRef.current) {
+        while(sceneRef.current.children.length > 0){ 
+          sceneRef.current.remove(sceneRef.current.children[0]); 
+        }
+      }
+      // Dispose of other resources
+      if (controlsRef.current) controlsRef.current.dispose();
+      if (rendererRef.current) rendererRef.current.dispose();
+    };
+  }, []); // Empty dependency array ensures this runs only once
+
+  // Update this effect to handle grid and box visibility without reinitializing the scene
+  useEffect(() => {
+    console.log('Visibility effect triggered', { showGrid, showBoundingBox, simulationType });
+    updateGridVisibility();
+    updateBoundingBoxVisibility();
+    
+    // Ensure the scene is re-rendered
+    if (rendererRef.current && sceneRef.current && cameraRef.current) {
+      rendererRef.current.render(sceneRef.current, cameraRef.current);
+    }
+  }, [showGrid, showBoundingBox, simulationType, updateGridVisibility, updateBoundingBoxVisibility]);
 
   const initScene = useCallback(() => {
     console.log('initScene called');
     if (!containerRef.current) {
-      console.error('Container ref is null');
+      console.log('Container ref is null');
       return;
     }
 
-    console.log('Initializing scene');
+    // Clear existing scene
+    if (sceneRef.current) {
+      while(sceneRef.current.children.length > 0){ 
+        sceneRef.current.remove(sceneRef.current.children[0]); 
+      }
+    } else {
+      sceneRef.current = new THREE.Scene();
+    }
 
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
+    console.log('Initializing scene');
 
     const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
     
@@ -99,11 +149,12 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
 
     // Add grid floor
     const gridHelper = new THREE.GridHelper(10, 10);
-    scene.add(gridHelper);
+    gridHelper.visible = showGrid && simulationType === 'beam';
+    sceneRef.current.add(gridHelper);
     gridRef.current = gridHelper;
     console.log('Grid helper added to scene');
 
-    // Add box with green edges
+    // Add box with white edges
     const boxGeometry = new THREE.BoxGeometry(2, 2, 2);
     const edges = new THREE.EdgesGeometry(boxGeometry);
     const lineMaterial = new THREE.LineBasicMaterial({ 
@@ -112,36 +163,26 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
       opacity: 0.5
     });
     const box = new THREE.LineSegments(edges, lineMaterial);
-    scene.add(box);
+    box.visible = showBoundingBox && simulationType === 'beam';
+    sceneRef.current.add(box);
     boxRef.current = box;
   
     console.log('Transparent white box added to scene');
   
     // Perform initial render
-    renderer.render(scene, camera);
+    renderer.render(sceneRef.current, camera);
     console.log('Initial render performed');
 
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
-      renderer.render(scene, camera);
+      if (sceneRef.current) {
+        renderer.render(sceneRef.current, camera);
+      }
     };
     animate();
     console.log('Animation loop started');
-  }, [simulationType, fractalType]);
-
-  useEffect(() => {
-    initScene();
-    
-    // Copy ref to a variable inside the effect
-    const currentContainer = containerRef.current;
-    
-    return () => {
-      if (rendererRef.current && currentContainer) {
-        currentContainer.removeChild(rendererRef.current.domElement);
-      }
-    };
-  }, [initScene]);
+  }, [simulationType]);
 
   const generateMandelbulb = useCallback((thresholdCutoff = 0.35) => {
     // console.log('Generating Mandelbulb with params:', fractalParams);
@@ -230,27 +271,54 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     const points: THREE.Vector3[] = [];
     const colors: THREE.Color[] = [];
     let x = 0.1, y = 0, z = 0;
-    const a = 10, b = 28, c = 8/3;
-    const numPoints = 10000;
+    const numPoints = 20000;
+    const dt = 0.0005;
+
+    // Calculate sinusoidal coefficients
+    const a = (Math.cos(frame * .0001) * fractalParams.A/2)+fractalParams.A/2 + 1;
+    const b = (Math.sin(frame * .0002) * fractalParams.B/2)+fractalParams.B/2 + 1;
+    const c = (Math.sin(frame * .0002) * fractalParams.C/2)+fractalParams.C/2 + 1;
+    const d = (Math.sin(frame * .0001) * fractalParams.n/2)+fractalParams.n/2 + 1;
+
+    let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+    let minX = Infinity, minY = Infinity, minZ = Infinity;
 
     for (let i = 0; i < numPoints; i++) {
       const dx = a * (y - x);
-      const dy = x * (b - z) - y;
-      const dz = x * y - c * z;
+      const dy = b * x - c * x * z;
+      const dz = Math.exp(x * y) - d * z;
 
-      x += dx * 0.01;
-      y += dy * 0.01;
-      z += dz * 0.01;
+      x += dx * dt;
+      y += dy * dt;
+      z += dz * dt;
+
+      // Update min and max values
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+      maxZ = Math.max(maxZ, z);
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      minZ = Math.min(minZ, z);
 
       // Only add points if not hiding half or if the point is in the visible half
       if (!hideHalfPoints || (x <= 0)) {
         points.push(new THREE.Vector3(x, y, z));
-        colors.push(new THREE.Color().setHSL(i / numPoints, 1, 0.5));
+        colors.push(new THREE.Color().setHSL(i / numPoints, 1, i / numPoints));
       }
     }
 
-    return { points, colors };
-  }, [hideHalfPoints]);
+    // Normalize points
+    const normalizeValue = (value: number, min: number, max: number) => 
+      (value - min) / (max - min);
+
+    const normalizedPoints = points.map(point => new THREE.Vector3(
+      normalizeValue(point.x, minX, maxX),
+      normalizeValue(point.y, minY, maxY),
+      normalizeValue(point.z, minZ, maxZ)
+    ));
+
+    return { points: normalizedPoints, colors };
+  }, [frame, hideHalfPoints, fractalParams]);
 
   const fitCameraToGeometry = useCallback((geometry: THREE.BufferGeometry) => {
     if (!cameraRef.current || !rendererRef.current) return;
@@ -297,7 +365,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
   }, [simulationType, fractalType]);
 
   const updatePointCloud = useCallback(() => {
-    // console.log('Updating point cloud with fractal params:', fractalParams);
+    console.log('updatePointCloud called', { simulationType, fractalType });
     if (!sceneRef.current) return;
 
     // Remove existing point cloud
@@ -396,7 +464,9 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
         ({ points, colors: fractalColors } = generateMandelbulb());
         currentPointSize = pointSize * 1; // Increase point size for mandelbulb
       } else if (fractalType === 'strangeAttractor') {
-        ({ points, colors: fractalColors } = generateStrangeAttractor());
+        ({ points, colors: fractalColors } = generateStrangeAttractor())
+        currentPointSize = pointSize * 1; // Increase point size for mandelbulb
+
       } else {
         console.error('Invalid fractal type');
         return;
@@ -437,49 +507,33 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     sceneRef.current.add(pointCloud);
     pointCloudRef.current = pointCloud;
 
-    if (simulationType === 'fractal' && fractalType === 'mandelbulb') {
+    // Always set the point cloud to visible
+    if (pointCloudRef.current) {
+      pointCloudRef.current.visible = true;
+      console.log('New point cloud created and set to visible');
+    }
+
+    if (simulationType === 'fractal') {
       setFrame(prevFrame => prevFrame + 1);
     }
 
-    // console.log(`Max value: ${maxValue}, Valid points: ${validPointCount}`);
+    console.log(`Point cloud updated: ${validPointCount} points added`);
     setIsGeometryLoaded(true);
   }, [pointsData, thresholdValue, skewValue, simulationType, fractalType, generateMandelbulb, generateStrangeAttractor, pointSize, hideHalfPoints, fractalParams]);
 
   // Effect for updating point cloud
   useEffect(() => {
-    // console.log('Effect triggered, updating point cloud');
+    console.log('Effect triggered, updating point cloud');
     updatePointCloud();
   }, [updatePointCloud, fractalParams]);
 
   // Effect for handling simulation changes
   useEffect(() => {
-    console.log('Simulation type or fractal type changed');
+    console.log('Simulation type or fractal type changed', { simulationType, fractalType });
     setIsNewSimulation(true);
     setShouldFitCamera(true);
     setIsGeometryLoaded(false);
   }, [simulationType, fractalType]);
-
-  // Effect for initializing and managing the bounding box
-  useEffect(() => {
-    if (!sceneRef.current) return;
-
-    if (!boxRef.current) {
-      const boxGeometry = new THREE.BoxGeometry(2, 2, 2);
-      const edges = new THREE.EdgesGeometry(boxGeometry);
-      const lineMaterial = new THREE.LineBasicMaterial({ 
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.5
-      });
-      const box = new THREE.LineSegments(edges, lineMaterial);
-      sceneRef.current.add(box);
-      boxRef.current = box;
-    }
-
-    boxRef.current.visible = simulationType === 'beam' && boxVisibility;
-    console.log('Box visibility set:', boxRef.current.visible);
-
-  }, [simulationType, boxVisibility]);
 
   // Effect for fitting camera when needed
   useEffect(() => {
@@ -492,10 +546,10 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
   }, [shouldFitCamera, isNewSimulation, isGeometryLoaded, fitCameraToGeometry]);
 
   useEffect(() => {
-    if (gridRef.current) {
-      gridRef.current.visible = showGrid;
+    if (boundingBoxRef.current) {
+      boundingBoxRef.current.visible = showBoundingBox;
     }
-  }, [showGrid]);
+  }, [showBoundingBox]);
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 });

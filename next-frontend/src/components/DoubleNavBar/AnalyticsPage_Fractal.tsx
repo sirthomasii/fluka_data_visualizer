@@ -8,8 +8,8 @@ interface AnalyticsPage_FractalProps {
 export function AnalyticsPage_Fractal({ fractalType }: AnalyticsPage_FractalProps) {
   return (
     <div>
-      <h3>Fractal Simulation Analytics</h3>
-      <Text>Selected Fractal: {fractalType || 'None'}</Text>
+        <Text size="xl" fw={200}>FRACTAL ANALYTICS</Text>
+        <Text>Selected Fractal: {fractalType || 'None'}</Text>
       {/* Add fractal-specific analytics here */}
     </div>
   );

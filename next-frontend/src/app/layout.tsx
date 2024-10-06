@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MantineProvider } from '@mantine/core'
 import { useState } from 'react'
 import '@mantine/core/styles.css'
+import './globals.css'
 
 export default function RootLayout({
   children,

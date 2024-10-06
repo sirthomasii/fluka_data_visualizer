@@ -104,7 +104,7 @@ export function DashboardPage_Beam({
 
   return (
     <div>
-      <h3>Proton beam params</h3>
+        <Text size="xl" fw={200}>BEAM PARAMETERS</Text>
 
       <Stack gap="md" style={{ maxWidth: 400, margin: '20px 0' }}>
         {flukaParams && (
@@ -132,12 +132,11 @@ export function DashboardPage_Beam({
         <Text size="sm">Lowest Visible Value</Text>
         <Slider
           min={minValue}
-          max={Math.min(1e+5, maxValue)} // Set max to 1e+5 or maxValue, whichever is smaller
+          max={Math.min(1e+5, maxValue)}
           value={thresholdValue}
           onChange={handleThresholdChange}
           onChangeEnd={(value) => console.log('Threshold slider change ended:', value)}
           step={(Math.min(1e+5, maxValue) - minValue) / 1000}
-          labelAlwaysOn
           label={(value) => value.toExponential(2)}
         />
         <Text size="sm">Color Gradient Skew</Text>
@@ -148,7 +147,7 @@ export function DashboardPage_Beam({
           value={skewValue}
           onChange={handleSkewChange}
           onChangeEnd={(value) => console.log('Skew slider change ended:', value)}
-          labelAlwaysOn
+          label={(value) => value.toFixed(1)}
         />
         <Button 
           onClick={() => setHideHalfPoints(!hideHalfPoints)}
