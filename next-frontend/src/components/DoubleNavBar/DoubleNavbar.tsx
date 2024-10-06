@@ -39,6 +39,10 @@ interface DoubleNavbarProps {
   setSimulationType: (type: 'beam' | 'fractal') => void;
   fractalType: string | null;
   setFractalType: (type: string | null) => void;
+  showBoundingBox: boolean;
+  setShowBoundingBox: (show: boolean) => void;
+  showGrid: boolean;
+  setShowGrid: (show: boolean) => void;
 }
 
 const mainLinksMockdata = [
@@ -69,7 +73,11 @@ export function DoubleNavbar({
   simulationType,
   setSimulationType,
   fractalType,
-  setFractalType
+  setFractalType,
+  showBoundingBox,
+  setShowBoundingBox,
+  showGrid,
+  setShowGrid
 }: DoubleNavbarProps) {
   // Change the initial state to 0 (Home)
   const [active, setActive] = useState(0);
@@ -117,6 +125,10 @@ export function DoubleNavbar({
             setMaterial={setMaterial}
             hideHalfPoints={hideHalfPoints}
             setHideHalfPoints={setHideHalfPoints}
+            showBoundingBox={showBoundingBox}
+            setShowBoundingBox={setShowBoundingBox}
+            showGrid={showGrid}
+            setShowGrid={setShowGrid}
           />
         ) : (
           <DashboardPage_Fractal

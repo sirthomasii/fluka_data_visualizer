@@ -18,6 +18,10 @@ interface DashboardPageProps {
   setMaterial: (value: string) => void;
   setHideHalfPoints: (hide: boolean) => void;
   hideHalfPoints: boolean;
+  showBoundingBox: boolean;
+  setShowBoundingBox: (show: boolean) => void;
+  showGrid: boolean;
+  setShowGrid: (show: boolean) => void;
 }
 
 interface FlukaParams {
@@ -36,7 +40,11 @@ export function DashboardPage_Beam({
   beamSize, setBeamSize,
   material, setMaterial,
   setHideHalfPoints,
-  hideHalfPoints
+  hideHalfPoints,
+  showBoundingBox,
+  setShowBoundingBox,
+  showGrid,
+  setShowGrid
 }: DashboardPageProps) {
   const [flukaParams, setFlukaParams] = useState<FlukaParams | null>(null);
 
@@ -124,11 +132,11 @@ export function DashboardPage_Beam({
         <Text size="sm">Lowest Visible Value</Text>
         <Slider
           min={minValue}
-          max={maxValue}
+          max={Math.min(1e+5, maxValue)} // Set max to 1e+5 or maxValue, whichever is smaller
           value={thresholdValue}
           onChange={handleThresholdChange}
           onChangeEnd={(value) => console.log('Threshold slider change ended:', value)}
-          step={(maxValue - minValue) / 1000}
+          step={(Math.min(1e+5, maxValue) - minValue) / 1000}
           labelAlwaysOn
           label={(value) => value.toExponential(2)}
         />
@@ -148,6 +156,20 @@ export function DashboardPage_Beam({
           color="purple" // Change the button color to blue
         >
           {hideHalfPoints ? "Show All Points" : "Hide Half Points"}
+        </Button>
+        <Button 
+          onClick={() => setShowBoundingBox(!showBoundingBox)}
+          variant={showBoundingBox ? "filled" : "outline"}
+          color="purple"
+        >
+          {showBoundingBox ? "Hide Bounding Box" : "Show Bounding Box"}
+        </Button>
+        <Button 
+          onClick={() => setShowGrid(!showGrid)}
+          variant={showGrid ? "filled" : "outline"}
+          color="purple"
+        >
+          {showGrid ? "Hide Grid" : "Show Grid"}
         </Button>
       </Stack>
     </div>

@@ -31,6 +31,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [fractalType, setFractalType] = useState<string | null>(null);
 
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showBoundingBox, setShowBoundingBox] = useState(true);
+  const [showGrid, setShowGrid] = useState(true);
 
   const handleThresholdChange = useCallback((value: number) => {
     setThresholdValue(value);
@@ -45,6 +47,10 @@ export function MainLayout({ children }: MainLayoutProps) {
     if (type === 'fractal') {
       setFractalType('mandelbulb');
     }
+  }, []);
+
+  const handleShowBoundingBoxChange = useCallback((show: boolean) => {
+    setShowBoundingBox(show);
   }, []);
 
   useEffect(() => {
@@ -153,6 +159,10 @@ export function MainLayout({ children }: MainLayoutProps) {
             setSimulationType={handleSimulationTypeChange}
             fractalType={fractalType || "mandelbulb"}
             setFractalType={setFractalType}
+            showBoundingBox={showBoundingBox}
+            setShowBoundingBox={handleShowBoundingBoxChange}
+            showGrid={showGrid}
+            setShowGrid={setShowGrid}
           />
         </Box>
         <Box style={{ flex: 1, position: 'relative', height: '100%' }}>
@@ -163,6 +173,8 @@ export function MainLayout({ children }: MainLayoutProps) {
             hideHalfPoints={hideHalfPoints}
             simulationType={simulationType}
             fractalType={fractalType as "mandelbulb" | "strangeAttractor" || "mandelbulb"}
+            showBoundingBox={showBoundingBox}
+            showGrid={showGrid}
           />
           {children}
         </Box>

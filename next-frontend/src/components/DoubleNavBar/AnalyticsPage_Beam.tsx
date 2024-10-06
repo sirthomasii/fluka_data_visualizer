@@ -83,7 +83,7 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
       return lines;
     };
 
-    const sampleSize = Math.min(100, pointsData.length);
+    const sampleSize = Math.min(150, pointsData.length);
 
     return {
       yyData: {
@@ -156,10 +156,10 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
     },
     layout: {
       padding: {
-        left: 0,
-        right: 0,
+        left: 10,
+        right: 10,
         top: 10,
-        bottom: 0
+        bottom: 10
       }
     }
   };
@@ -179,20 +179,14 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
       </Group>
 
       <Text size="lg" fw={500}>Y vs Energy</Text>
-      <div style={{ height: '150px', width: '100%', maxWidth: '100%', position: 'relative' }}>
+      <div style={{ height: '300px', width: '100%', maxWidth: '100%' }}>
         <Line data={chartData.yyData} options={chartOptions} />
       </div>
 
       <Text size="lg" fw={500}>Z vs Energy</Text>
-      <div style={{ height: '150px', width: '100%', maxWidth: '100%', position: 'relative' }}>
+      <div style={{ height: '300px', width: '100%', maxWidth: '100%' }}>
         <Line data={chartData.zzData} options={chartOptions} />
       </div>
-
-      <style jsx global>{`
-        canvas {
-          left: 0 !important;
-        }
-      `}</style>
     </Stack>
   );
 }
