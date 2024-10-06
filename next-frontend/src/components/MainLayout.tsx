@@ -16,6 +16,17 @@ interface DataPoint {
   value: number;
 }
 
+// Remove or comment out the unused DoubleNavbarProps interface
+// interface DoubleNavbarProps { ... }
+
+// Define a more specific type for fractalParams
+interface FractalParams {
+  A: number;
+  B: number;
+  C: number;
+  n: number;
+}
+
 export function MainLayout({ children }: MainLayoutProps) {
   const [thresholdValue, setThresholdValue] = useState(0);
   const [skewValue, setSkewValue] = useState(5.0); // Set initial value to 5.0
@@ -29,6 +40,12 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [material, setMaterial] = useState<string>('');
   const [simulationType, setSimulationType] = useState<'beam' | 'fractal'>('beam');
   const [fractalType, setFractalType] = useState<string | null>(null);
+  const [fractalParams, setFractalParams] = useState<FractalParams>({
+    A: 18,
+    B: 15,
+    C: 5,
+    n: 4
+  });
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [showBoundingBox, setShowBoundingBox] = useState(true);
@@ -127,6 +144,19 @@ export function MainLayout({ children }: MainLayoutProps) {
     }
   }, [isInitialized]);
 
+  useEffect(() => {
+    console.log('MainLayout fractalParams updated:', fractalParams);
+  }, [fractalParams]);
+
+  const handleFractalParamsChange = useCallback((newParams: FractalParams | ((prev: FractalParams) => FractalParams)) => {
+    console.log('MainLayout: handleFractalParamsChange called');
+    setFractalParams(prevParams => {
+      const updatedParams = typeof newParams === 'function' ? newParams(prevParams) : newParams;
+      console.log('MainLayout: Setting new fractal params:', updatedParams);
+      return updatedParams;
+    });
+  }, []);
+
   return (
     <Container 
       size="xl" 
@@ -163,6 +193,8 @@ export function MainLayout({ children }: MainLayoutProps) {
             setShowBoundingBox={handleShowBoundingBoxChange}
             showGrid={showGrid}
             setShowGrid={setShowGrid}
+            fractalParams={fractalParams}
+            setFractalParams={handleFractalParamsChange}
           />
         </Box>
         <Box style={{ flex: 1, position: 'relative', height: '100%' }}>
@@ -175,6 +207,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             fractalType={fractalType as "mandelbulb" | "strangeAttractor" || "mandelbulb"}
             showBoundingBox={showBoundingBox}
             showGrid={showGrid}
+            fractalParams={fractalParams}
           />
           {children}
         </Box>

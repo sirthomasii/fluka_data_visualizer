@@ -43,6 +43,18 @@ interface DoubleNavbarProps {
   setShowBoundingBox: (show: boolean) => void;
   showGrid: boolean;
   setShowGrid: (show: boolean) => void;
+  fractalParams: {
+    A: number;
+    B: number;
+    C: number;
+    n: number;
+  };
+  setFractalParams: React.Dispatch<React.SetStateAction<{
+    A: number;
+    B: number;
+    C: number;
+    n: number;
+  }>>;
 }
 
 const mainLinksMockdata = [
@@ -77,7 +89,9 @@ export function DoubleNavbar({
   showBoundingBox,
   setShowBoundingBox,
   showGrid,
-  setShowGrid
+  setShowGrid,
+  fractalParams,
+  setFractalParams
 }: DoubleNavbarProps) {
   // Change the initial state to 0 (Home)
   const [active, setActive] = useState(0);
@@ -136,6 +150,8 @@ export function DoubleNavbar({
             setFractalType={setFractalType}
             hideHalfPoints={hideHalfPoints}
             setHideHalfPoints={setHideHalfPoints}
+            fractalParams={fractalParams}
+            setFractalParams={setFractalParams}  // Use the prop directly
           />
         );
       case 2: // Analytics

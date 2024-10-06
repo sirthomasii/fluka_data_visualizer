@@ -21,10 +21,16 @@ interface PointCloudSceneProps {
   fractalType: 'mandelbulb' | 'strangeAttractor';
   showBoundingBox: boolean;
   showGrid: boolean;
+  fractalParams: {
+    A: number;
+    B: number;
+    C: number;
+    n: number;
+  };
 }
 
-const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdValue, skewValue, pointsData, pointSize = 2.5, hideHalfPoints, simulationType, fractalType, showBoundingBox, showGrid }) => {
-  console.log('PointCloudScene rendered', { pointsDataLength: pointsData.length, thresholdValue, skewValue, pointSize, hideHalfPoints });
+const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdValue, skewValue, pointsData, pointSize = 2.5, hideHalfPoints, simulationType, fractalType, showBoundingBox, showGrid, fractalParams }) => {
+  // console.log('PointCloudScene rendered', { pointsDataLength: pointsData.length, thresholdValue, skewValue, pointSize, hideHalfPoints });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -68,7 +74,13 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
-    camera.position.set(5, 5, 5);
+    
+    if (simulationType === 'fractal' && fractalType === 'mandelbulb') {
+      camera.position.set(1.5, 1.5, 1.5); // Zoomed out for mandelbulb
+    } else {
+      camera.position.set(1.5, 1.5, 1.5); // Default position for beam simulation
+    }
+    
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
@@ -116,7 +128,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     };
     animate();
     console.log('Animation loop started');
-  }, []);
+  }, [simulationType, fractalType]);
 
   useEffect(() => {
     initScene();
@@ -131,25 +143,27 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     };
   }, [initScene]);
 
-  const generateMandelbulb = useCallback((thresholdCutoff = 0.5) => {
+  const generateMandelbulb = useCallback((thresholdCutoff = 0.35) => {
+    // console.log('Generating Mandelbulb with params:', fractalParams);
     const resolution = 60;
-    const size = 3;
+    const size = 2;
     const points: THREE.Vector3[] = [];
     const colors: THREE.Color[] = [];
 
     // Calculate sinusoidal coefficients
-    const A = Math.abs(Math.cos(frame * .017) * 10) + 3; // Oscillates between 0.5 and 1.5
-    const B = Math.abs(Math.sin(frame * .013) * 10) + 3; // Oscillates between 0.5 and 1.5
-    const C = Math.abs(Math.sin(frame * .018) * 10) + 3; // Oscillates between 0.5 and 1.5
-    const n = Math.abs(Math.sin(frame * .012) * 10) + 5; // Oscillates between 0.5 and 1.5
+    const A = (Math.cos(frame * .017) * fractalParams.A/2)+fractalParams.A/2 + 1;
+    const B = (Math.sin(frame * .013) * fractalParams.B/2)+fractalParams.B/2 + 1;
+    const C = (Math.sin(frame * .018) * fractalParams.C/2)+fractalParams.C/2 + 1;
+    const n = (Math.sin(frame * .010) * fractalParams.n/2)+fractalParams.n/2 + 1;
 
-    const mandel = (x: number, y: number, z: number): number => {
+    const mandel = (x: number, y: number, z: number): [number, number] => {
       const x0 = x, y0 = y, z0 = z;
       const max = 3;
-
+      let value = 0;
       for (let i = 0; i < max; i++) {
-        if (A*Math.abs(x - x0) + B*Math.abs(y - y0) + C*Math.abs(z - z0) > n) {
-          return i / max;
+        value = A*Math.abs(x - x0) + B*Math.abs(y - y0) + C*Math.abs(z - z0)
+        if (value > n) {
+          return [i / max, (.25+0.1*(value / (n))) ];
         }
 
         const r = Math.sqrt(x*x + y*y + z*z);
@@ -161,27 +175,48 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
         y = rn * Math.sin(n * theta) * Math.sin(n * phi) + y0;
         z = rn * Math.cos(n * theta) + z0;
       }
-      return 0;
+      return [0, 0];
     };
+    let Offset_x = 0.01;
+    let Offset_y = 0.01;
+    let Offset_z = 0.01;
 
     for (let i = 0; i < resolution; i++) {
+      if (i % 2 == 0){
+        Offset_x += Offset_x;
+        Offset_y -= Offset_y;
+        Offset_z -= Offset_z;
+     }else{
+      Offset_x += Offset_x;
+      Offset_y += Offset_y;
+      Offset_z -= Offset_z;
+      }
       for (let j = 0; j < resolution; j++) {
-        for (let k = 0; k < resolution; k++) {
-          // const randomOffset = 0.005;
-          // const x = (i / resolution - 0.5) * size + (Math.random() - 0.5) * randomOffset;
-          // const y = (j / resolution - 0.5) * size + (Math.random() - 0.5) * randomOffset;
-          // const z = (k / resolution - 0.5) * size + (Math.random() - 0.5) * randomOffset;
 
-          const x = (i / resolution - 0.5) * size;
-          const y = (j / resolution - 0.5) * size;
-          const z = (k / resolution - 0.5) * size;
+        if (j % 2 == 0){
+           Offset_x += Offset_x;
+           Offset_y -= Offset_y;
+           Offset_z += Offset_z;
+        }
+        else{
+            Offset_x -= Offset_x;
+            Offset_y -= Offset_y;
+            Offset_z += Offset_z;
+        }
+
+        for (let k = 0; k < resolution; k++) {
+          
+          const x = (i / resolution - 0.5) * size + Offset_x;
+          const y = (j / resolution - 0.5) * size + Offset_y;
+          const z = (k / resolution - 0.5) * size + Offset_z;
+
 
           // Only add points if not hiding half or if the point is in the visible half
           if (!hideHalfPoints || (x <= 0)) {
-            const value = mandel(x, y, z);
+            const [value, color] = mandel(x, y, z);
             if (value > thresholdCutoff) {
               points.push(new THREE.Vector3(x, y, z));
-              colors.push(new THREE.Color().setHSL(value, 1, 0.5));
+              colors.push(new THREE.Color().setHSL(color, 1, color));
             }
           }
         }
@@ -189,7 +224,7 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
     }
 
     return { points, colors };
-  }, [frame, hideHalfPoints]);
+  }, [frame, hideHalfPoints, fractalParams]);
 
   const generateStrangeAttractor = useCallback(() => {
     const points: THREE.Vector3[] = [];
@@ -220,54 +255,49 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
   const fitCameraToGeometry = useCallback((geometry: THREE.BufferGeometry) => {
     if (!cameraRef.current || !rendererRef.current) return;
 
-    // Compute the bounding box of the geometry
     geometry.computeBoundingBox();
     const boundingBox = geometry.boundingBox;
     if (!boundingBox) return;
 
-    // Calculate the center of the bounding box
     const center = new THREE.Vector3();
     boundingBox.getCenter(center);
 
-    // Calculate the size of the bounding box
     const size = new THREE.Vector3();
     boundingBox.getSize(size);
 
-    // Calculate the radius of a sphere that would enclose the geometry
     const maxDim = Math.max(size.x, size.y, size.z);
     const fov = cameraRef.current.fov * (Math.PI / 180);
-    const cameraDistance = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+    let cameraDistance = Math.abs(maxDim / Math.tan(fov / 2));
 
-    // Set up isometric view
-    const isometricAngle = Math.PI / 4; // 45 degrees
+    if (simulationType === 'fractal' && fractalType === 'mandelbulb') {
+      cameraDistance *= 1.1; // Increase distance by 50% for mandelbulb
+    }else{
+      cameraDistance *= .75; // Increase distance by 50% for mandelbulb
+
+    }
+
+
+    const isometricAngle = Math.PI / 4;
     const cameraX = center.x + cameraDistance * Math.cos(isometricAngle);
     const cameraY = center.y + cameraDistance * Math.sin(isometricAngle);
     const cameraZ = center.z + cameraDistance * Math.sin(isometricAngle);
 
-    // Position the camera
     cameraRef.current.position.set(cameraX, cameraY, cameraZ);
-
-    // Look at the center of the geometry
     cameraRef.current.lookAt(center);
-
-    // Update the camera's near and far planes
     cameraRef.current.near = cameraDistance / 100;
     cameraRef.current.far = cameraDistance * 100;
-
-    // Update the camera
     cameraRef.current.updateProjectionMatrix();
 
-    // Update the controls target to the center of the geometry
     if (controlsRef.current) {
       controlsRef.current.target.copy(center);
       controlsRef.current.update();
     }
 
-    // Render the scene
     rendererRef.current.render(sceneRef.current!, cameraRef.current);
-  }, []);
+  }, [simulationType, fractalType]);
 
   const updatePointCloud = useCallback(() => {
+    // console.log('Updating point cloud with fractal params:', fractalParams);
     if (!sceneRef.current) return;
 
     // Remove existing point cloud
@@ -411,15 +441,15 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
       setFrame(prevFrame => prevFrame + 1);
     }
 
-    console.log(`Max value: ${maxValue}, Valid points: ${validPointCount}`);
+    // console.log(`Max value: ${maxValue}, Valid points: ${validPointCount}`);
     setIsGeometryLoaded(true);
-  }, [pointsData, thresholdValue, skewValue, simulationType, fractalType, generateMandelbulb, generateStrangeAttractor, pointSize, hideHalfPoints]);
+  }, [pointsData, thresholdValue, skewValue, simulationType, fractalType, generateMandelbulb, generateStrangeAttractor, pointSize, hideHalfPoints, fractalParams]);
 
   // Effect for updating point cloud
   useEffect(() => {
-    console.log('Updating point cloud');
+    // console.log('Effect triggered, updating point cloud');
     updatePointCloud();
-  }, [updatePointCloud]);
+  }, [updatePointCloud, fractalParams]);
 
   // Effect for handling simulation changes
   useEffect(() => {
