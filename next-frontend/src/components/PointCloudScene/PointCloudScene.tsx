@@ -252,15 +252,12 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
           const z = (k / resolution - 0.5) * size + Offset_z;
 
 
-          // Only add points if not hiding half or if the point is in the visible half
-          if (!hideHalfPoints || (x <= 0)) {
-            const [value, color] = mandel(x, y, z);
-            if (value > thresholdCutoff) {
-              points.push(new THREE.Vector3(x, y, z));
-              colors.push(new THREE.Color().setHSL(color, 1, color));
-            }
+          const [value, color] = mandel(x, y, z);
+          if (value > thresholdCutoff) {
+            points.push(new THREE.Vector3(x, y, z));
+            colors.push(new THREE.Color().setHSL(color, 1, color));
           }
-        }
+      }
       }
     }
 
@@ -293,19 +290,16 @@ const PointCloudScene: React.FC<PointCloudSceneProps> = React.memo(({ thresholdV
       z += dz * dt;
 
       // Update min and max values
-      maxX = Math.max(maxX, x);
-      maxY = Math.max(maxY, y);
-      maxZ = Math.max(maxZ, z);
-      minX = Math.min(minX, x);
-      minY = Math.min(minY, y);
-      minZ = Math.min(minZ, z);
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+      if (z > maxZ) maxZ = z;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (z < minZ) minZ = z;
 
-      // Only add points if not hiding half or if the point is in the visible half
-      if (!hideHalfPoints || (x <= 0)) {
-        points.push(new THREE.Vector3(x, y, z));
-        colors.push(new THREE.Color().setHSL(i / numPoints, 1, i / numPoints));
-      }
-    }
+      points.push(new THREE.Vector3(x, y, z));
+      colors.push(new THREE.Color().setHSL(i / numPoints, 1, i / numPoints));
+  }
 
     // Normalize points
     const normalizeValue = (value: number, min: number, max: number) => 
