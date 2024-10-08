@@ -102,6 +102,10 @@ export function DashboardPage_Beam({
     console.log(`DashboardPage - Current values: Threshold: ${thresholdValue}, Min: ${minValue}, Max: ${maxValue}, Skew: ${skewValue}`);
   }, [thresholdValue, minValue, maxValue, skewValue]);
 
+  const formatDisplayValue = (value: string) => {
+    return value.startsWith('-') ? value.slice(1) : value;
+  };
+
   return (
     <div>
         <Text size="xl" fw={200}>BEAM PARAMETERS</Text>
@@ -113,13 +117,13 @@ export function DashboardPage_Beam({
               label="Beam Energy (GeV)"
               value={beamEnergy}
               onChange={(value) => setBeamEnergy(value as string)}
-              data={flukaParams.BEAM_ENERGY?.map(energy => ({ value: energy, label: `${energy} GeV` })) || []}
+              data={flukaParams.BEAM_ENERGY?.map(energy => ({ value: energy, label: `${formatDisplayValue(energy)} GeV` })) || []}
             />
             <Select
               label="Beam Size (cm)"
               value={beamSize}
               onChange={(value) => setBeamSize(value as string)}
-              data={flukaParams.BEAM_SIZE?.map(size => ({ value: size, label: `${size} cm` })) || []}
+              data={flukaParams.BEAM_SIZE?.map(size => ({ value: size, label: `${formatDisplayValue(size)} cm` })) || []}
             />
             <Select
               label="Material"

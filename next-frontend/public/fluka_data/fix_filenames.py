@@ -1,4 +1,8 @@
 import os
+import sys
+
+# Change the working directory to the script's directory
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # Get the list of all files in the current directory
 for filename in os.listdir('.'):
