@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Container, Flex, Box } from '@mantine/core';
+import { Container, Flex, Box, Button } from '@mantine/core';
+import { IconMenu2 } from '@tabler/icons-react';
 import { DoubleNavbar } from './DoubleNavBar/DoubleNavbar';
 import PointCloudScene from './PointCloudScene/PointCloudScene';
 import Papa from 'papaparse';
 import flukaData from '../../public/fluka_data/fluka_list.json';
+import classes from './MainLayout.module.css';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -50,6 +52,12 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [showBoundingBox, setShowBoundingBox] = useState(true);
   const [showGrid, setShowGrid] = useState(true);
+
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarVisible(!isSidebarVisible);
+  };
 
   const handleThresholdChange = useCallback((value: number) => {
     setThresholdValue(value);
@@ -172,11 +180,29 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       }}
     >
+      <Button
+        className={classes.mobileMenuButton}
+        onClick={toggleSidebar}
+        variant="subtle"
+        style={{
+          position: 'absolute',
+          left: '-15px',
+          top: '10px',
+          zIndex: 1000
+        }}
+      >
+        <IconMenu2 size={32} />
+      </Button>
       <Flex style={{ height: '100%' }}>
-        <Box w={300} style={{ flexShrink: 0,borderRight: '1px solid black'}}>
-
+        <Box 
+          w={300} 
+          style={{ 
+            flexShrink: 0,
+            borderRight: '1px solid black',
+          }}
+          className={`${classes.sidebar} ${isSidebarVisible ? '' : classes.hidden}`}
+        >
           <DoubleNavbar
-          
             thresholdValue={thresholdValue}
             setThresholdValue={handleThresholdChange}
             skewValue={skewValue}

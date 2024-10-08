@@ -174,6 +174,8 @@ export function DashboardPage_Beam({
         >
           {showGrid ? "Hide Grid" : "Show Grid"}
         </Button>
+        <Text size="xs" fw={200}>DATA : FLUKA 2024 (fluka.org)</Text>
+
       </Stack>
     </div>
   );

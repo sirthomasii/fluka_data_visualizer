@@ -186,7 +186,6 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
       <div style={{ height: '200px', width: '250px', position: 'relative' }}>
         <Line data={chartData.zzData} options={chartOptions} />
       </div>
-      <Text size="xs" fw={200}>DATA : FLUKA 2024 (fluka.org)</Text>
 
     </Stack>
   );

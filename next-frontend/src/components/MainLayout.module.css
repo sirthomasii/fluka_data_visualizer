@@ -1,0 +1,31 @@
+.mobileMenuButton {
+    display: none;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1003;
+  }
+  
+  .sidebar {
+    transition: transform 0.3s ease-in-out;
+    z-index: 1001;
+  }
+  
+  .hidden {
+    transform: translateX(-100%);
+  }
+  
+  @media (max-width: 768px) {
+    .mobileMenuButton {
+      display: block;
+    }
+  
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 1;
+      background-color: #2424248c;
+    }
+  }
