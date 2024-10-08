@@ -14,6 +14,11 @@ def generate_fluka_list():
     os.chdir(script_dir)
     logging.info(f"Changed to script directory: {script_dir}")
 
+    # Clear the existing fluka_list.json file
+    if os.path.exists('fluka_list.json'):
+        os.remove('fluka_list.json')
+        logging.info("Cleared existing fluka_list.json")
+
     fluka_params = {
         'BEAM_ENERGY': set(),
         'BEAM_SIZE': set(),
@@ -44,9 +49,23 @@ def generate_fluka_list():
             # Update combinations
             combinations[file_params.get('MATERIAL', '')][file_params.get('BEAM_ENERGY', '')].add(file_params.get('BEAM_SIZE', ''))
 
-    # Convert sets to sorted lists
-    for key in ['BEAM_ENERGY', 'BEAM_SIZE', 'MATERIAL']:
-        fluka_params[key] = sorted(list(fluka_params[key]))
+    # New: Find common beam energies and sizes across all materials
+    common_beam_energies = set.intersection(*[set(energies.keys()) for energies in combinations.values()])
+    common_beam_sizes = set.intersection(*[set(size for sizes in material.values() for size in sizes) for material in combinations.values()])
+
+    # Update fluka_params with common values
+    fluka_params['BEAM_ENERGY'] = sorted(list(common_beam_energies))
+    fluka_params['BEAM_SIZE'] = sorted(list(common_beam_sizes))
+    fluka_params['MATERIAL'] = sorted(list(combinations.keys()))
+
+    # Update files dictionary to include only valid combinations
+    fluka_params['files'] = {
+        f"{energy}_{size}_{material}": fluka_params['files'].get(f"{energy}_{size}_{material}")
+        for energy in common_beam_energies
+        for size in common_beam_sizes
+        for material in fluka_params['MATERIAL']
+        if f"{energy}_{size}_{material}" in fluka_params['files']
+    }
 
     # Create a TypeScript-friendly structure
     ts_friendly_data = {
