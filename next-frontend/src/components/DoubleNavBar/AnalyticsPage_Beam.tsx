@@ -171,6 +171,7 @@ export function AnalyticsPage_Beam({ pointsData }: { pointsData: DataPoint[] }) 
         <Text size="xl" fw={200}>BEAM ANALYTICS</Text>
 
       <Group>
+      <Text size="xs">Units: GeV / (pp) / cm³.</Text>
         <Text size="xs">Points: {analysisResults.numPoints}</Text>
         <Text size="xs">Highest: {analysisResults.highestValue.toExponential(2)}</Text>
         <Text size="xs">Average: {analysisResults.avgValue.toExponential(2)}</Text>
