@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from collections import defaultdict
 
 # Set up basic logging
 logging.basicConfig(level=logging.INFO)
@@ -20,6 +21,9 @@ def generate_fluka_list():
         'files': {}
     }
 
+    # New: Track available combinations
+    combinations = defaultdict(lambda: defaultdict(set))
+
     for filename in os.listdir(script_dir):  # Changed from current_dir to script_dir
         if '.csv' in filename:
             logging.debug(f"Processing file: {filename}")
@@ -36,6 +40,9 @@ def generate_fluka_list():
 
             file_key = f"{file_params.get('BEAM_ENERGY', '')}_{file_params.get('BEAM_SIZE', '')}_{file_params.get('MATERIAL', '')}"
             fluka_params['files'][file_key] = filename
+
+            # Update combinations
+            combinations[file_params.get('MATERIAL', '')][file_params.get('BEAM_ENERGY', '')].add(file_params.get('BEAM_SIZE', ''))
 
     # Convert sets to sorted lists
     for key in ['BEAM_ENERGY', 'BEAM_SIZE', 'MATERIAL']:
